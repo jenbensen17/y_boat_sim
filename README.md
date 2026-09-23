@@ -115,27 +115,14 @@ cd ~/y_sim
 Choose the method that fits your situation:
 
 #### Option A: Pull Prebuilt from Docker Hub (Fastest, ~1–2 minutes) — *Recommended for Teammates*
-Instead of burning 15–20 minutes compiling ArduPilot and Gazebo plugins from source on every laptop, pull the official prebuilt image:
+Instead of burning 15–20 minutes compiling ArduPilot and Gazebo plugins from source on every laptop, pull the  prebuilt image:
 
 ```bash
 docker pull jenbensen17/y_boat_sim:latest
-docker tag jenbensen17/y_boat_sim:latest y_boat_sim_scratch:1c
 ```
-*(Or simply run `./run_sim.sh` — if the image isn't local, it will automatically pull it from Docker Hub and tag it for you!)*
+*(Or simply run `./run_sim.sh` — if the image isn't local, it will automatically pull it from Docker Hub and tag it for you!)*`
 
-#### Option B: Offline USB / Lab Share (~1 minute) — *Best in Person*
-If you are in the robotics lab with someone who already has the image:
-1. On the machine with the image:
-   ```bash
-   docker save yrobotics/y_boat_sim:latest | gzip > y_boat_sim.tar.gz
-   ```
-2. Copy `y_boat_sim.tar.gz` to a USB drive and plug it into your laptop.
-3. Load the image without internet or building:
-   ```bash
-   docker load < y_boat_sim.tar.gz
-   ```
-
-#### Option C: Build Locally from Source (~5–7 minutes)
+#### Option B: Build Locally from Source (~5–7 minutes)
 If you are developing Dockerfile customizations or building completely from scratch:
 
 ```bash
@@ -367,62 +354,3 @@ docker stop y_boat_sim
 ```
 
 ---
-
-## Troubleshooting & FAQs
-
-### 1. "Port 5760 / 5762 / 5763 already in use"
-**Cause**: A previous SITL process was not killed cleanly and is still bound to the port.  
-**Fix**: Stop any existing simulator container and kill remaining background processes:
-```bash
-docker stop y_boat_sim 2>/dev/null || true
-pkill -f ardurover 2>/dev/null || true
-```
-
-### 2. "Permission denied while trying to connect to the Docker daemon"
-**Cause**: Your user account does not have permission to access `/var/run/docker.sock`.  
-**Fix**: Add your user to the `docker` group:
-```bash
-sudo usermod -aG docker $USER
-```
-Log out and log back in, or restart your terminal.
-
-### 3. "Simulation container 'y_boat_sim' is not running!"
-**Cause**: You ran `./test_ros.sh` before starting `./run_sim.sh`.  
-**Fix**: Open one terminal and start `./run_sim.sh`. Once the simulator logs `Simulator is READY!`, open a second terminal and run `./test_ros.sh`.
-
-### 4. "Boat does not move when sending velocity"
-**Cause**: 
-- Mode was not changed to `GUIDED` (check `/mavros/state`).
-- Vehicle was not armed (call `/mavros/cmd/arming`).
-- Velocity was sent to `cmd_vel_unstamped` (in local ENU) instead of `/mavros/setpoint_raw/local` (in body frame).
-- Velocity stream rate was too slow (< 3 Hz), causing the 3-second guided timeout to stop the vehicle. Ensure you stream setpoints at $\ge 10\text{ Hz}$.
-
-### 5. "Simulation image 'y_boat_sim_scratch:1c' is not present locally"
-**Cause**: You pulled the image under a remote name (e.g. `jenbensen17/y_boat_sim:latest`) and the local alias `y_boat_sim_scratch:1c` does not exist yet.  
-**Fix**: Tag the pulled image as the local simulation tag:
-```bash
-docker tag jenbensen17/y_boat_sim:latest y_boat_sim_scratch:1c
-./run_sim.sh
-```
-*(Or specify the image explicitly: `IMAGE=jenbensen17/y_boat_sim:latest ./run_sim.sh`)*
-
-### 6. Windows WSL2: "Cannot open display" or Blank Window
-**Cause**: `$DISPLAY` is empty in your current WSL2 shell session, or WSLg is not updated.  
-**Fix**:
-1. Check your display variable:
-   ```bash
-   echo $DISPLAY
-   ```
-   If it is blank, set it and add to your `~/.bashrc`:
-   ```bash
-   export DISPLAY=:0
-   echo 'export DISPLAY=:0' >> ~/.bashrc
-   ```
-2. Update WSL from an Administrator PowerShell prompt on Windows:
-   ```powershell
-   wsl --update
-   ```
-3. Test that the container starts in headless mode:
-   ```bash
-   HEADLESS=1 ./run_sim.sh
-   ```
