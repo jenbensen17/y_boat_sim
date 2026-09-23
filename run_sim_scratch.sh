@@ -108,9 +108,6 @@ if [ "${HEADLESS}" = "0" ]; then
     if [ -d "/tmp/.X11-unix" ]; then
         DISPLAY_MOUNTS+=(-v "/tmp/.X11-unix:/tmp/.X11-unix")
     fi
-    if [ "${IS_WSL}" = "1" ] && [ -d "/mnt/wslg" ]; then
-        DISPLAY_MOUNTS+=(-v "/mnt/wslg:/mnt/wslg")
-    fi
 fi
 
 # --- 3. GPU Acceleration Auto-Detection -----------------------------------
