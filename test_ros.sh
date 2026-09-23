@@ -19,6 +19,7 @@ CONTAINER_NAME="${CONTAINER_NAME:-y_boat_sim}"
 if [ -f "/.dockerenv" ]; then
     # We are inside the container: run the test python script directly
     source /opt/ros/jazzy/setup.bash
+    export ROS_DOMAIN_ID="${ROS_DOMAIN_ID:-10}"
     python3 "${SCRIPT_DIR}/test_boat_drive.py" "$@"
 else
     # We are on the host: check if the simulation container is running
@@ -43,5 +44,5 @@ else
 
     echo "[test_ros] Running verification test inside container '${CONTAINER_NAME}'..."
     docker exec ${EXEC_TTY} "${CONTAINER_NAME}" bash -c \
-        "source /opt/ros/jazzy/setup.bash && python3 /home/simuser/sim_scratch/test_boat_drive.py $*"
+        "source /opt/ros/jazzy/setup.bash && export ROS_DOMAIN_ID=\"\${ROS_DOMAIN_ID:-10}\" && python3 /home/simuser/sim_scratch/test_boat_drive.py $*"
 fi

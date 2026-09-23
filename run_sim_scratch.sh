@@ -193,6 +193,7 @@ docker run --rm -i ${DOCKER_TTY} --init \
     -e WITH_ROS="${WITH_ROS:-1}" \
     -e QGC="${QGC:-1}" \
     -e HOME_LOCATION="${HOME_LOCATION:-}" \
+    -e ROS_DOMAIN_ID="${ROS_DOMAIN_ID:-10}" \
     "${DISPLAY_MOUNTS[@]}" \
     -v "${SCRIPT_DIR}:/home/simuser/sim_scratch" \
     "${IMAGE}" \
