@@ -51,7 +51,8 @@ flowchart TD
         MAVROS["MAVROS Node<br/>(udp://127.0.0.1:14551@)"]
         QGC["QGroundControl<br/>(UDP 14550)"]
 
-        GZ <-->|JSON plugin :9002/:9003| SITL
+        GZ -->|JSON plugin :9002/:9003| SITL
+        SITL -->|Motor commands| GZ
         GZ -->|gz.msgs.Clock| Bridge
         Bridge -->|ROS 2 /clock| MAVROS
         SITL -->|MAVLink UDP :14550| QGC
@@ -61,11 +62,11 @@ flowchart TD
     subgraph Desktop ["Desktop GUI (Exactly 3 Windows)"]
         GZ -.->|Render 3D World| Win1["1. Gazebo Sim GUI"]
         QGC -.->|Render Map & Status| Win2["2. QGroundControl GUI"]
-        SITL -.->|xterm with MAVProxy CLI| Win3: ["3. ArduPilot Terminal"]
+        SITL -.->|xterm with MAVProxy CLI| Win3["3. ArduPilot Terminal"]
     end
 
     subgraph Autonomy ["Autonomous Software Stack"]
-        MAVROS <-->|ROS 2 Topics & Services| UserNodes["Your ROS 2 Nodes / Nav2"]
+        MAVROS <--> UserNodes["Your ROS 2 Nodes / Nav2"]
     end
 ```
 
