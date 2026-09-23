@@ -142,14 +142,6 @@ If you are developing Dockerfile customizations or building completely from scra
 ```
 *(The Dockerfile is optimized with shallow git clones, BuildKit parallelization, and skips wxPython source compilation, cutting build time from 20 minutes down to ~5–7 minutes. On Apple Silicon Macs, `--platform linux/amd64` is enforced automatically).*
 
-> [!TIP]
-> **Publishing Updates to Docker Hub (`yrobotics`)**:
-> To push an updated image to Docker Hub so all teammates can immediately pull it:
-> ```bash
-> ./sim_scratch/push_sim.sh
-> ```
-> *(Prompts for your `yrobotics` Docker Hub credentials if you are not already logged in, then pushes both `:latest` and `:1c` tags).*
-
 ---
 
 ### Step 3: Launch the Simulator

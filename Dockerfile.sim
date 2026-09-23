@@ -65,7 +65,8 @@ ENV PATH="/home/${USERNAME}/.local/bin:/home/${USERNAME}/ardupilot/Tools/autotes
 
 # rover is the boat target; copter is needed only to run ardupilot_gazebo's own
 # iris_runway.sdf example, which is the plugin's built-in sanity check.
-RUN ./waf configure --board sitl && ./waf rover copter
+RUN ./waf configure --board sitl && ./waf rover copter \
+    && rm -rf /home/${USERNAME}/ardupilot/.git /home/${USERNAME}/.cache
 
 RUN echo "source /opt/ros/jazzy/setup.bash" >> /home/${USERNAME}/.bashrc \
     && echo "export PATH=\$HOME/.local/bin:\$HOME/ardupilot/Tools/autotest:\$PATH" >> /home/${USERNAME}/.bashrc
@@ -98,7 +99,8 @@ RUN mkdir -p /home/${USERNAME}/ardupilot_gazebo \
     && git -C /home/${USERNAME}/ardupilot_gazebo init \
     && git -C /home/${USERNAME}/ardupilot_gazebo remote add origin https://github.com/ArduPilot/ardupilot_gazebo.git \
     && git -C /home/${USERNAME}/ardupilot_gazebo fetch --depth 1 origin ${ARDUPILOT_GAZEBO_SHA} \
-    && git -C /home/${USERNAME}/ardupilot_gazebo checkout FETCH_HEAD
+    && git -C /home/${USERNAME}/ardupilot_gazebo checkout FETCH_HEAD \
+    && rm -rf /home/${USERNAME}/ardupilot_gazebo/.git
 WORKDIR /home/${USERNAME}/ardupilot_gazebo
 RUN bash -c 'source /opt/ros/jazzy/setup.bash \
     && mkdir -p build && cd build \
@@ -120,7 +122,8 @@ RUN mkdir -p /home/${USERNAME}/SITL_Models \
     && git -C /home/${USERNAME}/SITL_Models init \
     && git -C /home/${USERNAME}/SITL_Models remote add origin https://github.com/ArduPilot/SITL_Models.git \
     && git -C /home/${USERNAME}/SITL_Models fetch --depth 1 origin ${SITL_MODELS_SHA} \
-    && git -C /home/${USERNAME}/SITL_Models checkout FETCH_HEAD
+    && git -C /home/${USERNAME}/SITL_Models checkout FETCH_HEAD \
+    && rm -rf /home/${USERNAME}/SITL_Models/RealFlight /home/${USERNAME}/SITL_Models/.git
 
 # asv_wave_sim's README targets Gazebo Garden ("or later"); its CI is Jammy + gz-sim 7.1.0.
 # Harmonic (gz-sim8) is not explicitly claimed, so this build is the compatibility test.
@@ -128,7 +131,8 @@ RUN mkdir -p /home/${USERNAME}/gz_ws/src/asv_wave_sim \
     && git -C /home/${USERNAME}/gz_ws/src/asv_wave_sim init \
     && git -C /home/${USERNAME}/gz_ws/src/asv_wave_sim remote add origin https://github.com/srmainwaring/asv_wave_sim.git \
     && git -C /home/${USERNAME}/gz_ws/src/asv_wave_sim fetch --depth 1 origin ${ASV_WAVE_SIM_SHA} \
-    && git -C /home/${USERNAME}/gz_ws/src/asv_wave_sim checkout FETCH_HEAD
+    && git -C /home/${USERNAME}/gz_ws/src/asv_wave_sim checkout FETCH_HEAD \
+    && rm -rf /home/${USERNAME}/gz_ws/src/asv_wave_sim/.git
 WORKDIR /home/${USERNAME}/gz_ws
 # asv_wave_sim's gz-waves/CMakeLists.txt calls gz_find_package(GzOGRE2 ...), and
 # gz-cmake's FindGzOGRE2.cmake locates OGRE-Next through pkg-config. The ROS vendor

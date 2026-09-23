@@ -22,3 +22,6 @@ Thumbs.db
 *.swp
 *~
 *.bak
+
+# Maintainer / internal scripts (never shared)
+push_sim.sh
