@@ -13,10 +13,12 @@ set -euo pipefail
 if [ -z "${IMAGE:-}" ]; then
     if docker image inspect yrobotics/y_boat_sim:latest >/dev/null 2>&1; then
         IMAGE="yrobotics/y_boat_sim:latest"
+    elif docker image inspect jenbensen17/y_boat_sim:latest >/dev/null 2>&1; then
+        IMAGE="jenbensen17/y_boat_sim:latest"
     elif docker image inspect y_boat_sim_scratch:1c >/dev/null 2>&1; then
         IMAGE="y_boat_sim_scratch:1c"
     else
-        IMAGE="yrobotics/y_boat_sim:latest"
+        IMAGE="jenbensen17/y_boat_sim:latest"
     fi
 fi
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -162,6 +164,18 @@ if ! docker image inspect "${IMAGE}" >/dev/null 2>&1; then
         echo "[image] Remote image specified; attempting to pull '${IMAGE}'..."
         if docker pull "${IMAGE}"; then
             echo "[image] Successfully pulled '${IMAGE}'!"
+        elif [ "${IMAGE}" = "jenbensen17/y_boat_sim:latest" ]; then
+            echo "[image] Trying fallback: docker pull yrobotics/y_boat_sim:latest..."
+            if docker pull "yrobotics/y_boat_sim:latest"; then
+                IMAGE="yrobotics/y_boat_sim:latest"
+                echo "[image] Successfully pulled '${IMAGE}'!"
+            fi
+        elif [ "${IMAGE}" = "yrobotics/y_boat_sim:latest" ]; then
+            echo "[image] Trying fallback: docker pull jenbensen17/y_boat_sim:latest..."
+            if docker pull "jenbensen17/y_boat_sim:latest"; then
+                IMAGE="jenbensen17/y_boat_sim:latest"
+                echo "[image] Successfully pulled '${IMAGE}'!"
+            fi
         fi
     fi
 fi

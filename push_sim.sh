@@ -7,13 +7,27 @@
 #
 set -euo pipefail
 
-IMAGE="${IMAGE:-yrobotics/y_boat_sim}"
+# Detect logged in Docker Hub user from config
+LOGGED_IN_USER="$(jq -r '.auths["https://index.docker.io/v1/"].auth // empty' ~/.docker/config.json 2>/dev/null | base64 -d 2>/dev/null | cut -d: -f1 || true)"
+
+# Target image repository (prefers CLI argument, then $IMAGE env, then logged-in user, then yrobotics)
+IMAGE="${1:-${IMAGE:-}}"
+if [ -z "${IMAGE}" ]; then
+    if [ -n "${LOGGED_IN_USER}" ] && [ "${LOGGED_IN_USER}" != "yrobotics" ]; then
+        IMAGE="${LOGGED_IN_USER}/y_boat_sim"
+    else
+        IMAGE="yrobotics/y_boat_sim"
+    fi
+fi
 SOURCE_IMAGE="${SOURCE_IMAGE:-y_boat_sim_scratch:1c}"
 
 echo "======================================================================"
 echo "[push] Preparing to push simulation image to Docker Hub"
 echo "[push] Source: ${SOURCE_IMAGE}"
 echo "[push] Target: ${IMAGE}:latest and ${IMAGE}:1c"
+if [ -n "${LOGGED_IN_USER}" ]; then
+    echo "[push] Authenticated as: ${LOGGED_IN_USER}"
+fi
 echo "======================================================================"
 
 # Ensure source image exists locally
