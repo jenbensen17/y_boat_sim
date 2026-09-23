@@ -114,20 +114,19 @@ cd ~/y_sim
 
 Choose the method that fits your situation:
 
-#### Option A: Pull Prebuilt Image (Fastest, ~1–2 minutes) — *Recommended for Teammates*
-Instead of burning 15–20 minutes compiling ArduPilot and Gazebo plugins from source on every laptop, pull the prebuilt image from the container registry:
+#### Option A: Pull Prebuilt from Docker Hub (Fastest, ~1–2 minutes) — *Recommended for Teammates*
+Instead of burning 15–20 minutes compiling ArduPilot and Gazebo plugins from source on every laptop, pull the official prebuilt image:
 
 ```bash
-docker pull ghcr.io/<your-org>/y_boat_sim:1c
-docker tag ghcr.io/<your-org>/y_boat_sim:1c y_boat_sim_scratch:1c
+docker pull yrobotics/y_boat_sim:latest
 ```
-*(Setup drops to pure network download speed of compressed layers).*
+*(Or simply run `./run_sim.sh` — if the image isn't local, it will automatically pull it from Docker Hub for you!)*
 
 #### Option B: Offline USB / Lab Share (~1 minute) — *Best in Person*
 If you are in the robotics lab with someone who already has the image:
 1. On the machine with the image:
    ```bash
-   docker save y_boat_sim_scratch:1c | gzip > y_boat_sim.tar.gz
+   docker save yrobotics/y_boat_sim:latest | gzip > y_boat_sim.tar.gz
    ```
 2. Copy `y_boat_sim.tar.gz` to a USB drive and plug it into your laptop.
 3. Load the image without internet or building:
@@ -144,13 +143,12 @@ If you are developing Dockerfile customizations or building completely from scra
 *(The Dockerfile is optimized with shallow git clones, BuildKit parallelization, and skips wxPython source compilation, cutting build time from 20 minutes down to ~5–7 minutes. On Apple Silicon Macs, `--platform linux/amd64` is enforced automatically).*
 
 > [!TIP]
-> **Publishing to GHCR for your team**:
-> To publish the image to GitHub Packages so all teammates can use Option A:
+> **Publishing Updates to Docker Hub (`yrobotics`)**:
+> To push an updated image to Docker Hub so all teammates can immediately pull it:
 > ```bash
-> echo $CR_PAT | docker login ghcr.io -u <github-username> --password-stdin
-> docker tag y_boat_sim_scratch:1c ghcr.io/<github-username-or-org>/y_boat_sim:1c
-> docker push ghcr.io/<github-username-or-org>/y_boat_sim:1c
+> ./sim_scratch/push_sim.sh
 > ```
+> *(Prompts for your `yrobotics` Docker Hub credentials if you are not already logged in, then pushes both `:latest` and `:1c` tags).*
 
 ---
 

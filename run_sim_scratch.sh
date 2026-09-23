@@ -10,7 +10,15 @@
 #
 set -euo pipefail
 
-IMAGE="${IMAGE:-y_boat_sim_scratch:1c}"
+if [ -z "${IMAGE:-}" ]; then
+    if docker image inspect yrobotics/y_boat_sim:latest >/dev/null 2>&1; then
+        IMAGE="yrobotics/y_boat_sim:latest"
+    elif docker image inspect y_boat_sim_scratch:1c >/dev/null 2>&1; then
+        IMAGE="y_boat_sim_scratch:1c"
+    else
+        IMAGE="yrobotics/y_boat_sim:latest"
+    fi
+fi
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # --- 1. OS & Architecture Detection ---------------------------------------
@@ -165,8 +173,8 @@ if ! docker image inspect "${IMAGE}" >/dev/null 2>&1; then
     else
         echo "----------------------------------------------------------------------"
         echo "[image] Image '${IMAGE}' not found. Fast options to get it:"
-        echo "  1) Pull prebuilt (fastest, ~1-2 min):"
-        echo "     docker pull <registry>/y_boat_sim:1c && docker tag <registry>/y_boat_sim:1c ${IMAGE}"
+        echo "  1) Pull prebuilt from Docker Hub (fastest, ~1-2 min):"
+        echo "     docker pull yrobotics/y_boat_sim:latest"
         echo "  2) Load from offline USB / network tarball (~1 min):"
         echo "     docker load < y_boat_sim.tar.gz"
         echo "  3) Build locally from source (~5-7 min):"

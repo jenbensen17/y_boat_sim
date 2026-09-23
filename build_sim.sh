@@ -26,6 +26,14 @@ echo "======================================================================"
 
 DOCKER_BUILDKIT=1 docker build ${PLATFORM_ARG} -t "${IMAGE}" -f "${SCRIPT_DIR}/Dockerfile.sim" "${SCRIPT_DIR}"
 
+# Ensure both Docker Hub and local scratch tags exist
+if [ "${IMAGE}" = "y_boat_sim_scratch:1c" ]; then
+    docker tag "${IMAGE}" yrobotics/y_boat_sim:latest 2>/dev/null || true
+    docker tag "${IMAGE}" yrobotics/y_boat_sim:1c 2>/dev/null || true
+else
+    docker tag "${IMAGE}" y_boat_sim_scratch:1c 2>/dev/null || true
+fi
+
 echo ""
 echo "======================================================================"
 echo "[build] SUCCESS! Image '${IMAGE}' built successfully."
