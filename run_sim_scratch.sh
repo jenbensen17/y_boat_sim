@@ -25,6 +25,34 @@ if [ -z "${IMAGE:-}" ]; then
 fi
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Parse optional convenience flags
+GZ_GUI="${GZ_GUI:-1}"
+GZ_HEADLESS="${GZ_HEADLESS:-0}"
+QGC="${QGC:-1}"
+HEADLESS="${HEADLESS:-0}"
+PASSTHROUGH_ARGS=()
+
+for arg in "$@"; do
+    case "${arg}" in
+        --no-gz-gui|--no-gui-gz|--gz-headless)
+            GZ_GUI=0
+            GZ_HEADLESS=1
+            echo "[config] Gazebo 3D GUI disabled (--no-gz-gui). Running physics headless for max speed."
+            ;;
+        --headless)
+            HEADLESS=1
+            echo "[config] Running fully headless (no GUI windows)."
+            ;;
+        --no-qgc)
+            QGC=0
+            echo "[config] QGroundControl disabled (--no-qgc)."
+            ;;
+        *)
+            PASSTHROUGH_ARGS+=("${arg}")
+            ;;
+    esac
+done
+
 # --- 1. OS & Architecture Detection ---------------------------------------
 OS="$(uname -s)"
 ARCH="$(uname -m)"
@@ -95,6 +123,7 @@ grant_xhost() {
 }
 
 cleanup() {
+    docker rm -f "${CONTAINER_NAME}" >/dev/null 2>&1 || true
     if [ "${XHOST_ADDED_BY_US}" = "1" ] && [ -n "${XHOST_ENTRY}" ] && command -v xhost >/dev/null 2>&1; then
         echo "[xhost] revoking '-${XHOST_ENTRY}'"
         xhost "-${XHOST_ENTRY}" >/dev/null 2>&1 || true
@@ -236,11 +265,13 @@ docker run --rm -i ${DOCKER_TTY} --init \
     -e QT_QPA_PLATFORM="${QT_PLATFORM}" \
     -e GZ_IP="${GZ_IP_ADDR}" \
     -e HEADLESS="${HEADLESS}" \
+    -e GZ_GUI="${GZ_GUI}" \
+    -e GZ_HEADLESS="${GZ_HEADLESS}" \
     -e WITH_ROS="${WITH_ROS:-1}" \
-    -e QGC="${QGC:-1}" \
+    -e QGC="${QGC}" \
     -e HOME_LOCATION="${HOME_LOCATION:-}" \
     -e ROS_DOMAIN_ID="${ROS_DOMAIN_ID:-10}" \
     "${DISPLAY_MOUNTS[@]}" \
     -v "${SCRIPT_DIR}:/home/simuser/sim_scratch" \
     "${IMAGE}" \
-    "${@:-/home/simuser/sim_scratch/launch_blueboat.sh}"
+    "${PASSTHROUGH_ARGS[@]:-/home/simuser/sim_scratch/launch_blueboat.sh}"

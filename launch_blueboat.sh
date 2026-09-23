@@ -49,23 +49,37 @@ QGC_PID=""
 cleanup() {
     echo ""
     echo "[launch] shutting down..."
+    # 1. Graceful SIGTERM
     for pid in "${QGC_PID}" "${MAVROS_PID}" "${BRIDGE_PID}" "${SITL_PID}" "${GZ_PID}"; do
-        [ -n "${pid}" ] && kill -TERM "${pid}" 2>/dev/null
+        [ -n "${pid}" ] && kill -TERM "${pid}" 2>/dev/null || true
     done
-    # sim_vehicle.py and ros2 launch both spawn children that outlive a TERM to the
-    # parent. The vehicle binary in particular keeps host-global ports 5760-5763 bound
-    # under --network host, so the next run would die with
-    # "bind failed on port 5760 - Address already in use".
-    pkill -f 'bin/ardurover'     2>/dev/null
-    pkill -f 'mavproxy.py'       2>/dev/null
-    pkill -f 'sim_vehicle.py'    2>/dev/null
-    pkill -f 'mavros_node'       2>/dev/null
-    pkill -f 'parameter_bridge'  2>/dev/null
-    pkill -f 'qgroundcontrol'    2>/dev/null
-    pkill -f 'QGroundControl'    2>/dev/null
-    pkill -f 'gz sim'            2>/dev/null
-    wait 2>/dev/null
+    pkill -TERM -f 'bin/ardurover'     2>/dev/null || true
+    pkill -TERM -f 'mavproxy.py'       2>/dev/null || true
+    pkill -TERM -f 'sim_vehicle.py'    2>/dev/null || true
+    pkill -TERM -f 'mavros_node'       2>/dev/null || true
+    pkill -TERM -f 'parameter_bridge'  2>/dev/null || true
+    pkill -TERM -f 'QGroundControl'    2>/dev/null || true
+    pkill -TERM -f 'qgroundcontrol'    2>/dev/null || true
+    pkill -TERM -f 'gz sim'            2>/dev/null || true
+
+    sleep 1
+
+    # 2. Force kill (-9) anything that hung (QGC MAVLink/GStreamer threads often ignore SIGTERM)
+    for pid in "${QGC_PID}" "${MAVROS_PID}" "${BRIDGE_PID}" "${SITL_PID}" "${GZ_PID}"; do
+        [ -n "${pid}" ] && kill -9 "${pid}" 2>/dev/null || true
+    done
+    pkill -9 -f 'QGroundControl'    2>/dev/null || true
+    pkill -9 -f 'qgroundcontrol'    2>/dev/null || true
+    pkill -9 -f 'bin/ardurover'     2>/dev/null || true
+    pkill -9 -f 'mavproxy.py'       2>/dev/null || true
+    pkill -9 -f 'sim_vehicle.py'    2>/dev/null || true
+    pkill -9 -f 'mavros_node'       2>/dev/null || true
+    pkill -9 -f 'parameter_bridge'  2>/dev/null || true
+    pkill -9 -f 'gz sim'            2>/dev/null || true
+    pkill -9 -f 'xterm'             2>/dev/null || true
+
     echo "[launch] done."
+    exit 0
 }
 trap cleanup EXIT INT TERM
 
@@ -86,12 +100,22 @@ fi
 echo "[launch] world:    ${WORLD}"
 echo "[launch] params:   ${PARAM_FILE}"
 echo "[launch] home:     ${HOME_LOCATION}"
-echo "[launch] headless: ${HEADLESS}   with_ros: ${WITH_ROS}"
+GZ_GUI="${GZ_GUI:-1}"
+GZ_HEADLESS="${GZ_HEADLESS:-0}"
+if [ "${GZ_GUI}" = "0" ] || [ "${GZ_HEADLESS}" = "1" ] || [ "${HEADLESS}" = "1" ]; then
+    GZ_SERVER_ONLY=1
+else
+    GZ_SERVER_ONLY=0
+fi
+
+echo "[launch] headless: ${HEADLESS}   gz_gui: ${GZ_GUI}   with_ros: ${WITH_ROS}"
 
 # --- Gazebo ---------------------------------------------------------------
-if [ "${HEADLESS}" = "1" ]; then
+if [ "${GZ_SERVER_ONLY}" = "1" ]; then
+    echo "[launch] Starting Gazebo in SERVER-ONLY mode (physics headless, no 3D GUI lag)..."
     gz sim -v4 -r -s "${WORLD}" > /tmp/gz_blueboat.log 2>&1 &
 else
+    echo "[launch] Starting Gazebo in full 3D GUI mode..."
     gz sim -v4 -r "${WORLD}" > /tmp/gz_blueboat.log 2>&1 &
 fi
 GZ_PID=$!
@@ -180,10 +204,18 @@ echo "[launch] MAVLink: tcp:5760 (primary), 5762/5763 (aux), UDP out: ${MAVLINK_
 echo ""
 echo "======================================================================"
 echo "[launch] Simulator is READY!"
-echo "[launch] Windows active:"
-echo "[launch]   1. Gazebo Sim (3D boat in water)"
-echo "[launch]   2. QGroundControl (telemetry & map)"
-echo "[launch]   3. ArduPilot (MAVProxy terminal in xterm)"
+echo "[launch] Active components:"
+if [ "${GZ_SERVER_ONLY}" = "0" ]; then
+    echo "[launch]   1. Gazebo Sim (3D boat in water)"
+else
+    echo "[launch]   1. Gazebo Sim (server-only physics running at full speed - no 3D GUI)"
+fi
+if [ "${HEADLESS}" = "0" ] && [ "${QGC}" = "1" ]; then
+    echo "[launch]   2. QGroundControl GUI (telemetry & map)"
+fi
+if [ "${HEADLESS}" = "0" ]; then
+    echo "[launch]   3. ArduPilot Terminal (MAVProxy in xterm)"
+fi
 echo "[launch]"
 echo "[launch] To run the ROS 2 verification test from another host terminal:"
 echo "[launch]   ./sim_scratch/test_ros.sh"

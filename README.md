@@ -160,6 +160,14 @@ Exactly **3 graphical windows** will appear on your desktop:
 
 The terminal where you ran `./run_sim.sh` supervises the container. Press **`Ctrl+C`** in that terminal at any time to cleanly shut down all simulator processes and release ports.
 
+> [!TIP]
+> **Gazebo 3D lagging on Windows WSL2 or laptops?**
+> You can disable Gazebo's heavy 3D window while **keeping QGroundControl and ArduPilot terminal active**:
+> ```bash
+> ./run_sim.sh --no-gz-gui
+> ```
+> Gazebo's physics and hydrodynamics run headless at full 1000 Hz with almost zero CPU/GPU overhead, while QGroundControl (2D map & telemetry) and the terminal run smoothly at 60 FPS.
+
 ---
 
 ### Step 4: Verify ROS 2 Vehicle Control
@@ -338,6 +346,9 @@ The script automatically detects an empty `$DISPLAY` environment variable and fa
 
 # Launch full simulation (Gazebo + QGC + ArduPilot terminal)
 ./run_sim.sh
+
+# Launch with Gazebo headless (fastest physics, no 3D lag), keeping QGC & xterm
+./run_sim.sh --no-gz-gui
 
 # Launch without QGroundControl
 QGC=0 ./run_sim.sh
