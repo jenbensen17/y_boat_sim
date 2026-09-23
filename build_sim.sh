@@ -24,7 +24,7 @@ echo "[build] Dockerfile: ${SCRIPT_DIR}/Dockerfile.sim"
 echo "[build] Context:    ${SCRIPT_DIR}"
 echo "======================================================================"
 
-docker build ${PLATFORM_ARG} -t "${IMAGE}" -f "${SCRIPT_DIR}/Dockerfile.sim" "${SCRIPT_DIR}"
+DOCKER_BUILDKIT=1 docker build ${PLATFORM_ARG} -t "${IMAGE}" -f "${SCRIPT_DIR}/Dockerfile.sim" "${SCRIPT_DIR}"
 
 echo ""
 echo "======================================================================"

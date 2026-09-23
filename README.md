@@ -110,14 +110,47 @@ cd ~/y_sim
 
 ---
 
-### Step 2: Build the Simulation Image
-On a new machine, build the Docker container image once (takes ~15 minutes to download ROS 2 Jazzy and compile ArduPilot + Gazebo plugins):
+### Step 2: Obtain the Simulation Image (3 Ways)
+
+Choose the method that fits your situation:
+
+#### Option A: Pull Prebuilt Image (Fastest, ~1–2 minutes) — *Recommended for Teammates*
+Instead of burning 15–20 minutes compiling ArduPilot and Gazebo plugins from source on every laptop, pull the prebuilt image from the container registry:
+
+```bash
+docker pull ghcr.io/<your-org>/y_boat_sim:1c
+docker tag ghcr.io/<your-org>/y_boat_sim:1c y_boat_sim_scratch:1c
+```
+*(Setup drops to pure network download speed of compressed layers).*
+
+#### Option B: Offline USB / Lab Share (~1 minute) — *Best in Person*
+If you are in the robotics lab with someone who already has the image:
+1. On the machine with the image:
+   ```bash
+   docker save y_boat_sim_scratch:1c | gzip > y_boat_sim.tar.gz
+   ```
+2. Copy `y_boat_sim.tar.gz` to a USB drive and plug it into your laptop.
+3. Load the image without internet or building:
+   ```bash
+   docker load < y_boat_sim.tar.gz
+   ```
+
+#### Option C: Build Locally from Source (~5–7 minutes)
+If you are developing Dockerfile customizations or building completely from scratch:
 
 ```bash
 ./build_sim.sh
 ```
+*(The Dockerfile is optimized with shallow git clones, BuildKit parallelization, and skips wxPython source compilation, cutting build time from 20 minutes down to ~5–7 minutes. On Apple Silicon Macs, `--platform linux/amd64` is enforced automatically).*
 
-*(On Apple Silicon Macs, this script automatically invokes `--platform linux/amd64` using Docker's Rosetta 2 engine).*
+> [!TIP]
+> **Publishing to GHCR for your team**:
+> To publish the image to GitHub Packages so all teammates can use Option A:
+> ```bash
+> echo $CR_PAT | docker login ghcr.io -u <github-username> --password-stdin
+> docker tag y_boat_sim_scratch:1c ghcr.io/<github-username-or-org>/y_boat_sim:1c
+> docker push ghcr.io/<github-username-or-org>/y_boat_sim:1c
+> ```
 
 ---
 

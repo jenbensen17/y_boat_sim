@@ -150,14 +150,28 @@ docker rm -f "${CONTAINER_NAME}" >/dev/null 2>&1 || true
 
 if ! docker image inspect "${IMAGE}" >/dev/null 2>&1; then
     echo "[image] Simulation image '${IMAGE}' is not present locally."
+    if [[ "${IMAGE}" == *"/"* ]]; then
+        echo "[image] Remote image specified; attempting to pull '${IMAGE}'..."
+        if docker pull "${IMAGE}"; then
+            echo "[image] Successfully pulled '${IMAGE}'!"
+        fi
+    fi
+fi
+
+if ! docker image inspect "${IMAGE}" >/dev/null 2>&1; then
     if [ "${BUILD_IF_MISSING:-0}" = "1" ]; then
         echo "[image] BUILD_IF_MISSING=1 set: Building image now..."
         "${SCRIPT_DIR}/build_sim.sh"
     else
         echo "----------------------------------------------------------------------"
-        echo "[image] You can build it automatically by running:"
-        echo "        ./sim_scratch/build_sim.sh"
-        echo "        Or re-run this script with: BUILD_IF_MISSING=1 $0 $*"
+        echo "[image] Image '${IMAGE}' not found. Fast options to get it:"
+        echo "  1) Pull prebuilt (fastest, ~1-2 min):"
+        echo "     docker pull <registry>/y_boat_sim:1c && docker tag <registry>/y_boat_sim:1c ${IMAGE}"
+        echo "  2) Load from offline USB / network tarball (~1 min):"
+        echo "     docker load < y_boat_sim.tar.gz"
+        echo "  3) Build locally from source (~5-7 min):"
+        echo "     ./sim_scratch/build_sim.sh"
+        echo "     (or re-run with: BUILD_IF_MISSING=1 $0 $*)"
         echo "----------------------------------------------------------------------"
         exit 1
     fi

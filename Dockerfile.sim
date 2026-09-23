@@ -30,6 +30,7 @@ RUN apt-get update && apt-get install -y \
     git \
     python3-pip \
     iproute2 \
+    xterm \
     && rm -rf /var/lib/apt/lists/*
 
 # osrf/ros:jazzy-desktop-full already ships a UID/GID 1000 user named "ubuntu"
@@ -46,11 +47,18 @@ USER ${USERNAME}
 ENV USER=${USERNAME}
 WORKDIR /home/${USERNAME}
 
-RUN git clone --recurse-submodules --branch ${ARDUPILOT_TAG} \
+RUN git clone --depth 1 --shallow-submodules --recurse-submodules --branch ${ARDUPILOT_TAG} \
         https://github.com/ArduPilot/ardupilot.git \
     && git -C /home/${USERNAME}/ardupilot describe --tags
 
 WORKDIR /home/${USERNAME}/ardupilot
+# SKIP_AP_GRAPHIC_ENV=1 skips compiling wxPython from source (~8-10 min saving); wxPython
+# is unused because MAVProxy runs in text/CLI mode in xterm while Gazebo & QGC provide GUIs.
+# DO_AP_STM_ENV=0 skips downloading the ~200MB ARM STM32 toolchain (SITL uses host GCC).
+ENV SKIP_AP_GRAPHIC_ENV=1 \
+    DO_AP_STM_ENV=0 \
+    SKIP_AP_EXT_ENV=1 \
+    SKIP_AP_COV_ENV=1
 RUN Tools/environment_install/install-prereqs-ubuntu.sh -y
 
 ENV PATH="/home/${USERNAME}/.local/bin:/home/${USERNAME}/ardupilot/Tools/autotest:${PATH}"
@@ -86,8 +94,11 @@ ENV GZ_VERSION=harmonic
 # That package is not available here: Gazebo Harmonic comes from the ros-jazzy-gz-*-vendor
 # packages under /opt/ros/jazzy/opt/*_vendor, so the build must source the ROS setup to
 # put those cmake configs (gz-sim8-config.cmake etc.) on CMAKE_PREFIX_PATH.
-RUN git clone https://github.com/ArduPilot/ardupilot_gazebo.git /home/${USERNAME}/ardupilot_gazebo \
-    && git -C /home/${USERNAME}/ardupilot_gazebo checkout ${ARDUPILOT_GAZEBO_SHA}
+RUN mkdir -p /home/${USERNAME}/ardupilot_gazebo \
+    && git -C /home/${USERNAME}/ardupilot_gazebo init \
+    && git -C /home/${USERNAME}/ardupilot_gazebo remote add origin https://github.com/ArduPilot/ardupilot_gazebo.git \
+    && git -C /home/${USERNAME}/ardupilot_gazebo fetch --depth 1 origin ${ARDUPILOT_GAZEBO_SHA} \
+    && git -C /home/${USERNAME}/ardupilot_gazebo checkout FETCH_HEAD
 WORKDIR /home/${USERNAME}/ardupilot_gazebo
 RUN bash -c 'source /opt/ros/jazzy/setup.bash \
     && mkdir -p build && cd build \
@@ -105,15 +116,19 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 USER ${USERNAME}
 
-RUN git clone https://github.com/ArduPilot/SITL_Models.git /home/${USERNAME}/SITL_Models \
-    && git -C /home/${USERNAME}/SITL_Models checkout ${SITL_MODELS_SHA}
+RUN mkdir -p /home/${USERNAME}/SITL_Models \
+    && git -C /home/${USERNAME}/SITL_Models init \
+    && git -C /home/${USERNAME}/SITL_Models remote add origin https://github.com/ArduPilot/SITL_Models.git \
+    && git -C /home/${USERNAME}/SITL_Models fetch --depth 1 origin ${SITL_MODELS_SHA} \
+    && git -C /home/${USERNAME}/SITL_Models checkout FETCH_HEAD
 
 # asv_wave_sim's README targets Gazebo Garden ("or later"); its CI is Jammy + gz-sim 7.1.0.
 # Harmonic (gz-sim8) is not explicitly claimed, so this build is the compatibility test.
-RUN mkdir -p /home/${USERNAME}/gz_ws/src \
-    && git clone https://github.com/srmainwaring/asv_wave_sim.git \
-       /home/${USERNAME}/gz_ws/src/asv_wave_sim \
-    && git -C /home/${USERNAME}/gz_ws/src/asv_wave_sim checkout ${ASV_WAVE_SIM_SHA}
+RUN mkdir -p /home/${USERNAME}/gz_ws/src/asv_wave_sim \
+    && git -C /home/${USERNAME}/gz_ws/src/asv_wave_sim init \
+    && git -C /home/${USERNAME}/gz_ws/src/asv_wave_sim remote add origin https://github.com/srmainwaring/asv_wave_sim.git \
+    && git -C /home/${USERNAME}/gz_ws/src/asv_wave_sim fetch --depth 1 origin ${ASV_WAVE_SIM_SHA} \
+    && git -C /home/${USERNAME}/gz_ws/src/asv_wave_sim checkout FETCH_HEAD
 WORKDIR /home/${USERNAME}/gz_ws
 # asv_wave_sim's gz-waves/CMakeLists.txt calls gz_find_package(GzOGRE2 ...), and
 # gz-cmake's FindGzOGRE2.cmake locates OGRE-Next through pkg-config. The ROS vendor
