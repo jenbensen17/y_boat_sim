@@ -36,42 +36,6 @@ It packages **Gazebo Harmonic**, **ArduPilot SITL (`Rover-4.7.1`)**, **`asv_wave
 
 ---
 
-## Architecture & System Flow
-
-```mermaid
-flowchart TD
-    subgraph Host ["Host OS (Linux / Windows WSL2 / macOS)"]
-        UserShell["Host Shell / Terminal"] -->|./run_sim.sh| DockerDaemon["Docker Engine"]
-    end
-
-    subgraph Container ["Docker Container (y_boat_sim)"]
-        GZ["Gazebo Harmonic<br/>(blueboat_waves.sdf)"]
-        SITL["ArduPilot Rover SITL<br/>(Rover-4.7.1 skid-steer)"]
-        Bridge["ros_gz_bridge<br/>(/clock, /sim/ground_truth/odom)"]
-        MAVROS["MAVROS Node<br/>(udp://127.0.0.1:14551@)"]
-        QGC["QGroundControl<br/>(UDP 14550)"]
-
-        GZ -->|JSON plugin :9002/:9003| SITL
-        SITL -->|Motor commands| GZ
-        GZ -->|gz.msgs.Clock| Bridge
-        Bridge -->|ROS 2 /clock| MAVROS
-        SITL -->|MAVLink UDP :14550| QGC
-        SITL -->|MAVLink UDP :14551| MAVROS
-    end
-
-    subgraph Desktop ["Desktop GUI (Exactly 3 Windows)"]
-        GZ -.->|Render 3D World| Win1["1. Gazebo Sim GUI"]
-        QGC -.->|Render Map & Status| Win2["2. QGroundControl GUI"]
-        SITL -.->|xterm with MAVProxy CLI| Win3["3. ArduPilot Terminal"]
-    end
-
-    subgraph Autonomy ["Autonomous Software Stack"]
-        MAVROS <--> UserNodes["Your ROS 2 Nodes / Nav2"]
-    end
-```
-
----
-
 ## Prerequisites by Operating System
 
 ### 1. Linux (Native)
