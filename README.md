@@ -118,9 +118,10 @@ Choose the method that fits your situation:
 Instead of burning 15–20 minutes compiling ArduPilot and Gazebo plugins from source on every laptop, pull the official prebuilt image:
 
 ```bash
-docker pull yrobotics/y_boat_sim:latest
+docker pull jenbensen17/y_boat_sim:latest
+docker tag jenbensen17/y_boat_sim:latest y_boat_sim_scratch:1c
 ```
-*(Or simply run `./run_sim.sh` — if the image isn't local, it will automatically pull it from Docker Hub for you!)*
+*(Or simply run `./run_sim.sh` — if the image isn't local, it will automatically pull it from Docker Hub and tag it for you!)*
 
 #### Option B: Offline USB / Lab Share (~1 minute) — *Best in Person*
 If you are in the robotics lab with someone who already has the image:
@@ -384,3 +385,33 @@ Log out and log back in, or restart your terminal.
 - Vehicle was not armed (call `/mavros/cmd/arming`).
 - Velocity was sent to `cmd_vel_unstamped` (in local ENU) instead of `/mavros/setpoint_raw/local` (in body frame).
 - Velocity stream rate was too slow (< 3 Hz), causing the 3-second guided timeout to stop the vehicle. Ensure you stream setpoints at $\ge 10\text{ Hz}$.
+
+### 5. "Simulation image 'y_boat_sim_scratch:1c' is not present locally"
+**Cause**: You pulled the image under a remote name (e.g. `jenbensen17/y_boat_sim:latest`) and the local alias `y_boat_sim_scratch:1c` does not exist yet.  
+**Fix**: Tag the pulled image as the local simulation tag:
+```bash
+docker tag jenbensen17/y_boat_sim:latest y_boat_sim_scratch:1c
+./run_sim.sh
+```
+*(Or specify the image explicitly: `IMAGE=jenbensen17/y_boat_sim:latest ./run_sim.sh`)*
+
+### 6. Windows WSL2: "Cannot open display" or Blank Window
+**Cause**: `$DISPLAY` is empty in your current WSL2 shell session, or WSLg is not updated.  
+**Fix**:
+1. Check your display variable:
+   ```bash
+   echo $DISPLAY
+   ```
+   If it is blank, set it and add to your `~/.bashrc`:
+   ```bash
+   export DISPLAY=:0
+   echo 'export DISPLAY=:0' >> ~/.bashrc
+   ```
+2. Update WSL from an Administrator PowerShell prompt on Windows:
+   ```powershell
+   wsl --update
+   ```
+3. Test that the container starts in headless mode:
+   ```bash
+   HEADLESS=1 ./run_sim.sh
+   ```

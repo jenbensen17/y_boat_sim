@@ -11,10 +11,12 @@
 set -euo pipefail
 
 if [ -z "${IMAGE:-}" ]; then
-    if docker image inspect yrobotics/y_boat_sim:latest >/dev/null 2>&1; then
-        IMAGE="yrobotics/y_boat_sim:latest"
-    elif docker image inspect jenbensen17/y_boat_sim:latest >/dev/null 2>&1; then
+    if docker image inspect jenbensen17/y_boat_sim:latest >/dev/null 2>&1; then
         IMAGE="jenbensen17/y_boat_sim:latest"
+    elif docker image inspect yrobotics/y_boat_sim:latest >/dev/null 2>&1; then
+        IMAGE="yrobotics/y_boat_sim:latest"
+    elif docker image inspect jenbensen17/y_boat_sim:1c >/dev/null 2>&1; then
+        IMAGE="jenbensen17/y_boat_sim:1c"
     elif docker image inspect y_boat_sim_scratch:1c >/dev/null 2>&1; then
         IMAGE="y_boat_sim_scratch:1c"
     else
@@ -47,8 +49,13 @@ fi
 
 HEADLESS="${HEADLESS:-0}"
 if [ -z "${DISPLAY:-}" ]; then
-    echo "[display] No DISPLAY variable found; running in HEADLESS mode (no GUI)."
-    HEADLESS=1
+    if [ "${IS_WSL}" = "1" ] && [ -d "/mnt/wslg" ]; then
+        echo "[display] Windows WSLg detected with empty DISPLAY; auto-setting DISPLAY=':0'."
+        DISPLAY=":0"
+    else
+        echo "[display] No DISPLAY variable found; running in HEADLESS mode (no GUI)."
+        HEADLESS=1
+    fi
 elif [ "${IS_DARWIN}" = "1" ]; then
     if [ "${DISPLAY}" = ":0" ] || [ "${DISPLAY}" = "0" ]; then
         echo "[display] macOS detected: mapping DISPLAY to 'host.docker.internal:0' for XQuartz."
@@ -164,17 +171,20 @@ if ! docker image inspect "${IMAGE}" >/dev/null 2>&1; then
         echo "[image] Remote image specified; attempting to pull '${IMAGE}'..."
         if docker pull "${IMAGE}"; then
             echo "[image] Successfully pulled '${IMAGE}'!"
+            docker tag "${IMAGE}" y_boat_sim_scratch:1c 2>/dev/null || true
         elif [ "${IMAGE}" = "jenbensen17/y_boat_sim:latest" ]; then
             echo "[image] Trying fallback: docker pull yrobotics/y_boat_sim:latest..."
             if docker pull "yrobotics/y_boat_sim:latest"; then
                 IMAGE="yrobotics/y_boat_sim:latest"
                 echo "[image] Successfully pulled '${IMAGE}'!"
+                docker tag "${IMAGE}" y_boat_sim_scratch:1c 2>/dev/null || true
             fi
         elif [ "${IMAGE}" = "yrobotics/y_boat_sim:latest" ]; then
             echo "[image] Trying fallback: docker pull jenbensen17/y_boat_sim:latest..."
             if docker pull "jenbensen17/y_boat_sim:latest"; then
                 IMAGE="jenbensen17/y_boat_sim:latest"
                 echo "[image] Successfully pulled '${IMAGE}'!"
+                docker tag "${IMAGE}" y_boat_sim_scratch:1c 2>/dev/null || true
             fi
         fi
     fi
@@ -186,9 +196,12 @@ if ! docker image inspect "${IMAGE}" >/dev/null 2>&1; then
         "${SCRIPT_DIR}/build_sim.sh"
     else
         echo "----------------------------------------------------------------------"
-        echo "[image] Image '${IMAGE}' not found. Fast options to get it:"
+        echo "[image] Image '${IMAGE}' not found locally or failed to pull."
+        echo "Quick options to get it:"
         echo "  1) Pull prebuilt from Docker Hub (fastest, ~1-2 min):"
-        echo "     docker pull yrobotics/y_boat_sim:latest"
+        echo "     docker pull jenbensen17/y_boat_sim:latest"
+        echo "     docker tag jenbensen17/y_boat_sim:latest y_boat_sim_scratch:1c"
+        echo "     ./run_sim.sh"
         echo "  2) Load from offline USB / network tarball (~1 min):"
         echo "     docker load < y_boat_sim.tar.gz"
         echo "  3) Build locally from source (~5-7 min):"
