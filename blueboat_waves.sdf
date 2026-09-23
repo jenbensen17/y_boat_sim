@@ -1,0 +1,153 @@
+<?xml version="1.0" ?>
+<!--
+  BlueBoat in the asv_wave_sim wave field.
+
+  Derived from asv_wave_sim's gz-waves-models/worlds/waves.sdf, with three changes
+  that stock waves.sdf does not provide and ArduPilot needs:
+
+    1. gz-sim-navsat-system plugin   - stock waves.sdf has no NavSat, so an ArduPilot
+                                       vehicle in it would never get a GPS fix.
+    2. <spherical_coordinates>       - gives the world a geodetic origin. This MUST match
+                                       the --custom-location passed to sim_vehicle.py or
+                                       Gazebo and SITL disagree about where the boat is.
+                                       Default here is Utah Lake State Park, Provo, UT.
+    3. model://blueboat include      - per SITL_Models/Gazebo/docs/BlueBoat.md.
+
+  The demo clutter from waves.sdf (duck, spherical_buoy, wam-v, barrage) is removed so
+  the only floating body is the BlueBoat.
+-->
+<sdf version="1.6">
+  <world name="waves">
+    <plugin filename="gz-sim-physics-system"
+            name="gz::sim::systems::Physics">
+    </plugin>
+    <plugin filename="gz-sim-sensors-system"
+            name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+      <background_color>0.8 0.8 0.8</background_color>
+    </plugin>
+    <plugin filename="gz-sim-scene-broadcaster-system"
+            name="gz::sim::systems::SceneBroadcaster">
+    </plugin>
+    <plugin filename="gz-sim-user-commands-system"
+            name="gz::sim::systems::UserCommands">
+    </plugin>
+    <plugin filename="gz-sim-imu-system"
+            name="gz::sim::systems::Imu">
+    </plugin>
+    <plugin filename="gz-sim-navsat-system"
+            name="gz::sim::systems::NavSat">
+    </plugin>
+
+    <!-- Open water on Utah Lake, ~5.5 km west of Utah Lake State Park, Provo UT.
+         MUST be kept in sync with HOME_LOCATION in launch_blueboat.sh, or Gazebo and
+         SITL disagree about where the boat is.
+
+         Previously 40.2386,-111.7353 (the state park marina). Gazebo has no terrain so
+         the boat floated fine either way, but that coordinate plots on the shore in
+         QGC's satellite map, which would make map-planned missions look like they run
+         over land. Moved west into the lake proper; latitude unchanged.
+         Utah Lake surface elevation is ~1368 m. -->
+    <spherical_coordinates>
+      <surface_model>EARTH_WGS84</surface_model>
+      <world_frame_orientation>ENU</world_frame_orientation>
+      <latitude_deg>40.2386</latitude_deg>
+      <longitude_deg>-111.8000</longitude_deg>
+      <elevation>1368.0</elevation>
+      <heading_deg>0</heading_deg>
+    </spherical_coordinates>
+
+    <scene>
+      <ambient>1.0 1.0 1.0</ambient>
+      <background>0.8 0.8 0.8</background>
+      <sky></sky>
+    </scene>
+
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.6 0.6 0.6 1</specular>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+
+    <!--
+      Calm-water version of asv_wave_sim's `waves` world model, inlined rather than
+      included so the wave parameters can be overridden (SDF <include> gives no way to
+      override a nested plugin's params).
+
+      TO RESTORE WAVES: set wind_speed back to 5.0 and steepness back to 2 in BOTH
+      the WavesModel and WavesVisual blocks below (they must stay in sync), or just
+      replace this whole model with:
+          <include><uri>model://waves</uri></include>
+
+      Mesh/texture URIs use model://waves/... so they still resolve to the upstream
+      asv_wave_sim model directory.
+    -->
+    <model name="waves">
+      <static>true</static>
+
+      <plugin
+          filename="gz-waves1-waves-model-system"
+          name="gz::sim::systems::WavesModel">
+        <static>0</static>
+        <update_rate>30</update_rate>
+        <wave>
+          <algorithm>fft</algorithm>
+          <tile_size>256</tile_size>
+          <cell_count>256</cell_count>
+          <wind_speed>0.0</wind_speed>
+          <wind_angle_deg>135</wind_angle_deg>
+          <steepness>0</steepness>
+        </wave>
+      </plugin>
+
+      <link name="base_link">
+        <visual name="visual">
+          <geometry>
+            <mesh>
+              <uri>model://waves/materials/mesh_L256m_N256.dae</uri>
+            </mesh>
+          </geometry>
+          <material>
+            <ambient>0.0 0.05 0.8 0.92</ambient>
+            <diffuse>0.0 0.1 0.7 0.92</diffuse>
+            <specular>0.7 0.7 0.7 0.92</specular>
+            <pbr>
+              <metal>
+                <albedo_map>model://waves/materials/water.jpg</albedo_map>
+                <normal_map>model://waves/materials/wave_normals.dds</normal_map>
+                <environment_map>model://waves/materials/skybox_lowres.dds</environment_map>
+                <roughness>0.3</roughness>
+                <metalness>0.1</metalness>
+              </metal>
+            </pbr>
+          </material>
+
+          <plugin
+              filename="gz-waves1-waves-visual-system"
+              name="gz::sim::systems::WavesVisual">
+            <static>0</static>
+            <mesh_deformation_method>DYNAMIC_GEOMETRY</mesh_deformation_method>
+            <tiles_x>-0 0</tiles_x>
+            <tiles_y>-0 0</tiles_y>
+            <wave>
+              <algorithm>fft</algorithm>
+              <tile_size>256</tile_size>
+              <cell_count>256</cell_count>
+              <wind_speed>0.0</wind_speed>
+              <wind_angle_deg>135</wind_angle_deg>
+              <steepness>0</steepness>
+            </wave>
+          </plugin>
+        </visual>
+      </link>
+    </model>
+
+    <include>
+      <pose degrees="true">0 0 0 0 0 90</pose>
+      <uri>model://blueboat</uri>
+    </include>
+
+  </world>
+</sdf>

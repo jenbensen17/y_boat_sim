@@ -1,0 +1,16 @@
+# BlueBoat SITL parameters
+# Base values are the ones documented in SITL_Models/Gazebo/docs/BlueBoat.md as the
+# "minor modifications" that make the default skid-steer rover params workable.
+CRUISE_SPEED      2.0
+CRUISE_THROTTLE   50.0
+FRAME_CLASS       2.0
+WP_SPEED          2.0
+
+# Realistic arming checks.
+# NOTE: ArduPilot 4.8.0-dev has NO `ARMING_CHECK` parameter — setting it fails with
+# "Unable to find parameter 'ARMING_CHECK'". It was replaced by ARMING_SKIPCHK, a
+# bitmask of checks to *SKIP* (AP_Arming.cpp: AP_GROUPINFO("SKIPCHK", 13, ...,
+# checks_to_skip, 0)). 0 = skip nothing = ALL pre-arm checks enabled, which is the
+# default. Set explicitly here so the intent is visible and can't silently regress.
+# (-1 would skip all non-mandatory checks — the opposite of what we want.)
+ARMING_SKIPCHK    0

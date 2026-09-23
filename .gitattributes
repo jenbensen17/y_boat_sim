@@ -1,0 +1,9 @@
+# Enforce Unix line endings (LF) across all operating systems, including Windows/WSL
+* text eol=lf
+*.sh text eol=lf
+*.py text eol=lf
+*.sdf text eol=lf
+*.parm text eol=lf
+*.yaml text eol=lf
+*.md text eol=lf
+Dockerfile* text eol=lf

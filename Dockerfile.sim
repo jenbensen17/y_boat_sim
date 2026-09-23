@@ -1,0 +1,208 @@
+FROM osrf/ros:jazzy-desktop-full
+
+ARG USERNAME=simuser
+ARG USER_UID=1000
+ARG USER_GID=1000
+
+# ---------------------------------------------------------------------------
+# Pinned upstream versions (Step 1c).
+#
+# ArduPilot: latest STABLE Rover release tag. Candidates at time of pinning were
+#   Rover-4.7.1 (latest stable), Rover-4.7.0, Rover-4.6.3.
+# Step 1b ran unpinned master (b5fbe26515..., "ArduPilot-4.6.0-beta1-8738-g..."),
+# i.e. 4.8.0-dev. Moving to a stable tag is deliberately a behaviour change --
+# see "Parameter revalidation" in step1c3_report.md.
+#
+# The other three are the exact commits that Step 1b was tested against, read back
+# out of the Step 1b image so the pin reproduces what was actually validated.
+# ---------------------------------------------------------------------------
+ARG ARDUPILOT_TAG=Rover-4.7.1
+ARG ARDUPILOT_GAZEBO_SHA=082a0fe231f6e63bc8d1598f1cba461d9e2ea7f5
+ARG ASV_WAVE_SIM_SHA=ca8629df4e191235753dfae92ef725d30b923364
+ARG SITL_MODELS_SHA=25bc38ed8c6c0345840159a8cbc0b02781d52f3c
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y \
+    ros-jazzy-ros-gz \
+    mesa-utils \
+    sudo \
+    git \
+    python3-pip \
+    iproute2 \
+    && rm -rf /var/lib/apt/lists/*
+
+# osrf/ros:jazzy-desktop-full already ships a UID/GID 1000 user named "ubuntu"
+# (matches typical host UID/GID), so rename it instead of creating a fresh one.
+RUN usermod -l ${USERNAME} -m -d /home/${USERNAME} -s /bin/bash ubuntu \
+    && groupmod -n ${USERNAME} ubuntu \
+    && echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/${USERNAME} \
+    && chmod 0440 /etc/sudoers.d/${USERNAME}
+
+USER ${USERNAME}
+# install-prereqs-ubuntu.sh calls `sudo usermod -a -G dialout $USER`, but Docker's
+# USER instruction does not set the $USER env var for subsequent RUN shells — set it
+# explicitly or that call fails with a usermod usage error (missing LOGIN arg).
+ENV USER=${USERNAME}
+WORKDIR /home/${USERNAME}
+
+RUN git clone --recurse-submodules --branch ${ARDUPILOT_TAG} \
+        https://github.com/ArduPilot/ardupilot.git \
+    && git -C /home/${USERNAME}/ardupilot describe --tags
+
+WORKDIR /home/${USERNAME}/ardupilot
+RUN Tools/environment_install/install-prereqs-ubuntu.sh -y
+
+ENV PATH="/home/${USERNAME}/.local/bin:/home/${USERNAME}/ardupilot/Tools/autotest:${PATH}"
+
+# rover is the boat target; copter is needed only to run ardupilot_gazebo's own
+# iris_runway.sdf example, which is the plugin's built-in sanity check.
+RUN ./waf configure --board sitl && ./waf rover copter
+
+RUN echo "source /opt/ros/jazzy/setup.bash" >> /home/${USERNAME}/.bashrc \
+    && echo "export PATH=\$HOME/.local/bin:\$HOME/ardupilot/Tools/autotest:\$PATH" >> /home/${USERNAME}/.bashrc
+
+# ---------------------------------------------------------------------------
+# Step 1b: ArduPilot Gazebo plugin (Harmonic, JSON interface)
+# ---------------------------------------------------------------------------
+USER root
+RUN apt-get update && apt-get install -y \
+    rapidjson-dev \
+    libopencv-dev \
+    libgstreamer1.0-dev \
+    libgstreamer-plugins-base1.0-dev \
+    gstreamer1.0-plugins-base \
+    gstreamer1.0-plugins-good \
+    gstreamer1.0-plugins-bad \
+    gstreamer1.0-plugins-ugly \
+    gstreamer1.0-libav \
+    gstreamer1.0-gl \
+    && rm -rf /var/lib/apt/lists/*
+USER ${USERNAME}
+
+ENV GZ_VERSION=harmonic
+
+# ardupilot_gazebo's docs assume a standalone `libgz-sim8-dev` from the OSRF apt repo.
+# That package is not available here: Gazebo Harmonic comes from the ros-jazzy-gz-*-vendor
+# packages under /opt/ros/jazzy/opt/*_vendor, so the build must source the ROS setup to
+# put those cmake configs (gz-sim8-config.cmake etc.) on CMAKE_PREFIX_PATH.
+RUN git clone https://github.com/ArduPilot/ardupilot_gazebo.git /home/${USERNAME}/ardupilot_gazebo \
+    && git -C /home/${USERNAME}/ardupilot_gazebo checkout ${ARDUPILOT_GAZEBO_SHA}
+WORKDIR /home/${USERNAME}/ardupilot_gazebo
+RUN bash -c 'source /opt/ros/jazzy/setup.bash \
+    && mkdir -p build && cd build \
+    && cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+    && make -j$(nproc)'
+
+# ---------------------------------------------------------------------------
+# Step 1b: BlueBoat model + asv_wave_sim hydrodynamics
+# ---------------------------------------------------------------------------
+USER root
+# CGAL (mesh manipulation) and FFTW (Fourier transforms) are asv_wave_sim's documented deps.
+RUN apt-get update && apt-get install -y \
+    libcgal-dev \
+    libfftw3-dev \
+    && rm -rf /var/lib/apt/lists/*
+USER ${USERNAME}
+
+RUN git clone https://github.com/ArduPilot/SITL_Models.git /home/${USERNAME}/SITL_Models \
+    && git -C /home/${USERNAME}/SITL_Models checkout ${SITL_MODELS_SHA}
+
+# asv_wave_sim's README targets Gazebo Garden ("or later"); its CI is Jammy + gz-sim 7.1.0.
+# Harmonic (gz-sim8) is not explicitly claimed, so this build is the compatibility test.
+RUN mkdir -p /home/${USERNAME}/gz_ws/src \
+    && git clone https://github.com/srmainwaring/asv_wave_sim.git \
+       /home/${USERNAME}/gz_ws/src/asv_wave_sim \
+    && git -C /home/${USERNAME}/gz_ws/src/asv_wave_sim checkout ${ASV_WAVE_SIM_SHA}
+WORKDIR /home/${USERNAME}/gz_ws
+# asv_wave_sim's gz-waves/CMakeLists.txt calls gz_find_package(GzOGRE2 ...), and
+# gz-cmake's FindGzOGRE2.cmake locates OGRE-Next through pkg-config. The ROS vendor
+# packages keep their .pc files in gz_ogre_next_vendor/lib/pkgconfig, which is NOT on
+# PKG_CONFIG_PATH after sourcing the ROS setup — so GzOGRE2 was silently not found and
+# the build died with "Target ... links to: GzOGRE2::GzOGRE2 but the target was not found".
+ENV PKG_CONFIG_PATH=/opt/ros/jazzy/opt/gz_ogre_next_vendor/lib/pkgconfig
+RUN bash -c 'source /opt/ros/jazzy/setup.bash \
+    && colcon build --symlink-install --merge-install --cmake-args \
+       -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+       -DBUILD_TESTING=ON \
+       -DCMAKE_CXX_STANDARD=17'
+
+# The gz-waves *-system plugins link against libgz-waves1.so.1 / libgz-waves1-rendering.so.1,
+# which live in the colcon merge-install lib dir. Without this the plugins are found but
+# fail to load with "libgz-waves1.so.1: cannot open shared object file".
+# (Equivalent to the README's `source ~/gz_ws/install/setup.bash`, but always in effect.)
+ENV LD_LIBRARY_PATH=/home/${USERNAME}/gz_ws/install/lib:${LD_LIBRARY_PATH}
+ENV GZ_SIM_SYSTEM_PLUGIN_PATH=/home/${USERNAME}/ardupilot_gazebo/build:/home/${USERNAME}/gz_ws/install/lib
+ENV GZ_SIM_RESOURCE_PATH=/home/${USERNAME}/ardupilot_gazebo/models:/home/${USERNAME}/ardupilot_gazebo/worlds:/home/${USERNAME}/SITL_Models/Gazebo/models:/home/${USERNAME}/SITL_Models/Gazebo/worlds:/home/${USERNAME}/gz_ws/src/asv_wave_sim/gz-waves-models/models:/home/${USERNAME}/gz_ws/src/asv_wave_sim/gz-waves-models/world_models:/home/${USERNAME}/gz_ws/src/asv_wave_sim/gz-waves-models/worlds
+
+# ---------------------------------------------------------------------------
+# Step 1c/3: MAVROS (ArduPilot flavour) for ROS 2 control
+# ---------------------------------------------------------------------------
+USER root
+RUN apt-get update && apt-get install -y \
+    ros-jazzy-mavros \
+    ros-jazzy-mavros-extras \
+    && rm -rf /var/lib/apt/lists/*
+
+# MAVROS needs the GeographicLib geoid datasets to convert AMSL <-> ellipsoid height;
+# without them the mavros node aborts at startup. The installer ships with the package.
+RUN bash /opt/ros/jazzy/lib/mavros/install_geographiclib_datasets.sh
+USER ${USERNAME}
+
+# ---------------------------------------------------------------------------
+# Step 1c/3: QGroundControl (pinned AppImage, extracted rather than FUSE-mounted)
+#
+# Stable release candidates at time of pinning: v5.1.4 (latest stable), v5.1.3
+# (stable), v5.1.0. v5.1.2 was a release candidate (prerelease) and was excluded.
+# Chose v5.1.4.
+#
+# NOTE ON CHECKSUMS: upstream publishes NO checksum/signature file alongside QGC
+# releases (the v5.1.4 assets are only the AppImages, .dmg, .apk and .exe installers).
+# QGC_SHA256 is therefore a trust-on-first-use pin recorded from the exact artifact
+# that was downloaded and tested here; the build fails loudly if those bytes ever
+# change, which is the reproducibility guarantee we actually want.
+# ---------------------------------------------------------------------------
+ARG QGC_VERSION=v5.1.4
+ARG QGC_SHA256=1c4ac089abfaac6c6fcd75c7b477ea18da1bc3592cddca5ab1a19c1a13410e65
+
+USER root
+# Qt6 runtime bits the AppImage expects that jazzy-desktop-full does not already carry.
+# (GStreamer for QGC's video streaming is already installed by the ardupilot_gazebo step.)
+RUN apt-get update && apt-get install -y \
+    libxcb-xinerama0 \
+    libxcb-cursor0 \
+    libxkbcommon-x11-0 \
+    libpulse0 \
+    libgl1 \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
+
+# Containers usually lack FUSE, so the AppImage is self-extracted with
+# --appimage-extract and run via its AppRun instead of being mounted.
+RUN wget -q -O /tmp/QGroundControl.AppImage \
+      "https://github.com/mavlink/qgroundcontrol/releases/download/${QGC_VERSION}/QGroundControl-x86_64.AppImage" \
+    && echo "${QGC_SHA256}  /tmp/QGroundControl.AppImage" | sha256sum -c - \
+    && chmod +x /tmp/QGroundControl.AppImage \
+    && cd /opt \
+    && /tmp/QGroundControl.AppImage --appimage-extract > /dev/null \
+    && mv /opt/squashfs-root /opt/qgroundcontrol \
+    && rm -f /tmp/QGroundControl.AppImage \
+    && printf '#!/usr/bin/env bash\n# QGC refuses to run as root; this launcher is meant to be run as %s.\nexec /opt/qgroundcontrol/AppRun "$@"\n' "${USERNAME}" \
+       > /usr/local/bin/qgroundcontrol \
+    && chmod 0755 /usr/local/bin/qgroundcontrol
+USER ${USERNAME}
+
+# install-prereqs-ubuntu.sh puts MAVProxy in a virtualenv and activates it from
+# ~/.profile ONLY. That means a login shell (`bash -l`) finds mavproxy.py but a plain
+# interactive shell (which sources ~/.bashrc) does not, so `sim_vehicle.py` dies with
+# "[Errno 2] No such file or directory: 'mavproxy.py'" and takes SITL down with it.
+# Putting the venv on PATH here makes it work in every shell and for every process.
+#
+# APPENDED, not prepended, on purpose: the venv also contains a `python3`, and putting
+# that ahead of /usr/bin/python3 would shadow the interpreter that has rclpy, breaking
+# ROS 2 nodes. mavproxy.py exists only in the venv, so position does not affect finding
+# it, and its shebang still selects the venv interpreter.
+ENV PATH="${PATH}:/home/${USERNAME}/venv-ardupilot/bin"
+
+WORKDIR /home/${USERNAME}
+CMD ["bash"]

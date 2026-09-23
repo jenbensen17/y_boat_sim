@@ -1,0 +1,28 @@
+# ros_gz_bridge configuration for the BlueBoat scratch sim.
+#
+# Deliberately minimal: no sensors (no LiDAR, no camera) in this step.
+#
+# Both entries are GZ_TO_ROS only. Nothing in ROS should be driving Gazebo directly --
+# the boat is commanded through ArduPilot/MAVROS, not by writing to Gazebo topics.
+
+# Simulation clock. Everything else in the ROS graph should run with use_sim_time:=true
+# and take its time from here.
+- ros_topic_name: "/clock"
+  gz_topic_name: "/clock"
+  ros_type_name: "rosgraph_msgs/msg/Clock"
+  gz_type_name: "gz.msgs.Clock"
+  direction: GZ_TO_ROS
+
+# Ground-truth odometry straight from the simulator, published by the
+# gz::sim::systems::OdometryPublisher already present in the BlueBoat model
+# (odom_frame=odom, robot_base_frame=base_link, dimensions=3).
+#
+# FOR DEBUGGING / EVALUATION ONLY. This is the simulator's perfect state, not an
+# estimate. Nav2 and any team code must consume MAVROS's estimate
+# (/mavros/local_position/odom) instead -- the namespace is deliberately /sim/... so the
+# two can never be confused.
+- ros_topic_name: "/sim/ground_truth/odom"
+  gz_topic_name: "/model/blueboat/odometry"
+  ros_type_name: "nav_msgs/msg/Odometry"
+  gz_type_name: "gz.msgs.Odometry"
+  direction: GZ_TO_ROS
