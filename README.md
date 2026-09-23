@@ -36,6 +36,16 @@ It packages **Gazebo Harmonic**, **ArduPilot SITL (`Rover-4.7.1`)**, **`asv_wave
 
 ---
 
+### Why We Use These Three Core Tools
+
+| Tool | Role | Why We Chose It | How It Helps Us |
+|---|---|---|---|
+| **Gazebo Harmonic** | **Virtual Lake** *(Physics & World)* | Accurate fluid dynamics, water buoyancy, wave interaction (`asv_wave_sim`), and thruster response. | Replaces the physical lake. Allows testing collision avoidance, rough water stability, and thruster limits with zero risk to hardware. |
+| **ArduPilot SITL + Terminal** | **Autopilot Brain** *(Low-Level Control)* | Line-for-line identical firmware (`Rover-4.7.1`) to the real boat's Pixhawk/Cube computer. Battle-tested EKF3 state estimation and skid-steer thruster mixing. | Any ROS 2 autonomy code that works in SITL works on the physical boat with zero firmware changes. The terminal gives engineers instant access to change modes (`mode GUIDED`), arm thrusters, and tune 1,000+ parameters live. |
+| **QGroundControl (QGC)** | **Shore Station** *(Operator Mission Control)* | Global standard ground control station communicating over MAVLink (UDP 14550). Rich satellite map, HUD, battery voltage, and waypoint planner. | Gives human operators complete situational awareness. Allows drawing and uploading autonomous GPS waypoint routes for competition tasks, plus instant safety overrides (Return-to-Launch or manual joystick takeover). |
+
+---
+
 ## Prerequisites by Operating System
 
 ### 1. Linux (Native)
