@@ -5,7 +5,8 @@
 #   ros_gz_bridge         (/clock + /sim/ground_truth/odom)
 #   MAVROS                (udp://127.0.0.1:14551@, use_sim_time:=true)
 #
-# Run this INSIDE the sim container (start it with ./run_sim_scratch.sh).
+# Run this INSIDE the sim container. On the host you never call it directly --
+# ./run_sim.sh starts the container and runs this as its command.
 #
 #   ./launch_blueboat.sh              # DEFAULT: Gazebo GUI + ArduPilot/MAVProxy console
 #                                     #          + ros_gz_bridge + MAVROS + QGroundControl
@@ -191,7 +192,7 @@ if [ "${QGC}" = "1" ]; then
         echo "[launch] QGC=1 ignored: QGroundControl refuses to run as root."
     else
         # Same display environment as Gazebo (DISPLAY + the X11 socket mount come from
-        # run_sim_scratch.sh); QT_QPA_PLATFORM=xcb keeps Qt off Wayland under XWayland.
+        # run_sim.sh); QT_QPA_PLATFORM=xcb keeps Qt off Wayland under XWayland.
         QT_QPA_PLATFORM="${QT_QPA_PLATFORM:-xcb}" qgroundcontrol \
             > /tmp/qgc.log 2>&1 &
         QGC_PID=$!
@@ -218,7 +219,7 @@ if [ "${HEADLESS}" = "0" ]; then
 fi
 echo "[launch]"
 echo "[launch] To run the ROS 2 verification test from another host terminal:"
-echo "[launch]   ./sim_scratch/test_ros.sh"
+echo "[launch]   ./test_ros.sh"
 echo "[launch] Or to open a bash shell in the running container:"
 echo "[launch]   docker exec -it y_boat_sim bash"
 echo "======================================================================"

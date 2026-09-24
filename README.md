@@ -10,394 +10,90 @@ It packages **Gazebo Harmonic**, **ArduPilot SITL (`Rover-4.7.1`)**, **`asv_wave
 
 ---
 
-## Table of Contents
-- [Architecture & System Flow](#architecture--system-flow)
-- [Prerequisites by Operating System](#prerequisites-by-operating-system)
-  - [Linux (Ubuntu / Arch / Fedora)](#1-linux-native)
-  - [Windows 10/11 (WSL2)](#2-windows-1011-wsl2)
-  - [macOS (Apple Silicon & Intel)](#3-macos-apple-silicon-m1m4--intel)
-- [Step-by-Step Quickstart](#step-by-step-quickstart)
-  - [1. Clone the Repository](#step-1-clone-the-repository)
-  - [2. Build the Simulation Image](#step-2-build-the-simulation-image)
-  - [3. Launch the Simulator](#step-3-launch-the-simulator)
-  - [4. Verify ROS 2 Vehicle Control](#step-4-verify-ros-2-vehicle-control)
-- [Developing ROS 2 Nodes & Nav2](#developing-ros-2-nodes--nav2)
-  - [Entering the Container](#entering-the-container)
-  - [Key Topics & Services Reference](#key-topics--services-reference)
-  - [Four Critical Rules for Autonomy & Nav2](#four-critical-rules-for-autonomy--nav2)
-  - [Minimal Python Control Example](#minimal-python-control-example)
-  - [Giving Waypoint Missions (3 Methods)](#giving-waypoint-missions-3-methods)
-- [Connecting with y_boat_core (Sim-to-Real Parity)](#connecting-with-y_boat_core-live-simulation--sim-to-real-parity)
-- [Platform-Specific Guides](#platform-specific-guides)
-  - [Windows WSL2 Setup Details](#windows-wsl2-setup-details)
-  - [macOS Workflows (Native QGC vs XQuartz)](#macos-workflows)
-  - [Headless / Cloud / CI Mode](#headless--cloud--ci-mode)
-- [Common Commands & Cheat Sheet](#common-commands--cheat-sheet)
-- [Troubleshooting & FAQs](#troubleshooting--faqs)
+## Quickstart
+
+Three commands. The launcher pulls the image if you don't have it, and detects your
+OS, GPU and display on its own.
+
+```bash
+git clone git@github.com:jenbensen17/y_boat_sim.git ~/y_sim
+cd ~/y_sim
+./run_sim.sh
+```
+
+Then, in a second terminal, verify that ROS 2 can drive the boat:
+
+```bash
+./test_ros.sh
+```
+
+That's it. Press `Ctrl+C` in the first terminal to shut everything down cleanly.
+
+> [!IMPORTANT]
+> **Windows/WSL users**: clone inside the Linux filesystem (`~/y_sim`), **never**
+> under `/mnt/c/...`. See [docs/platforms.md](docs/platforms.md) for per-OS
+> prerequisites.
+
+### What opens
+
+Three windows appear on your desktop:
+
+1. **Gazebo Sim** — the 3D boat floating in water.
+2. **QGroundControl** — telemetry, map and the waypoint planner.
+3. **ArduPilot terminal** (`xterm`) — a live MAVProxy console at a `MANUAL>` prompt.
+
+> [!TIP]
+> If the Gazebo 3D window is slow on a laptop or under WSL2, run
+> `./run_sim.sh --no-gz-gui`. Physics keeps running at full rate; you keep QGC and
+> the terminal.
 
 ---
 
-### Why We Use These Three Core Tools
+## Repository Layout
+
+Everything at the top level is something **you run on your machine**. Everything in
+`sim/` runs **inside the container** and you rarely need to touch it.
+
+```
+run_sim.sh          Start the simulator.  ← the one you'll use
+build_sim.sh        Build the Docker image from source (optional; run_sim.sh pulls it).
+test_ros.sh         Run the ROS 2 verification test against a running sim.
+Dockerfile.sim      The image definition.
+
+sim/                Runs inside the container:
+  launch_blueboat.sh  brings up Gazebo + SITL + bridge + MAVROS + QGC
+  blueboat_waves.sdf  the world (boat + hydrodynamics)
+  blueboat.parm       ArduPilot parameters
+  blueboat_mission.txt  sample 25 m rectangular search pattern
+  bridge.yaml         ros_gz_bridge topic mapping
+  fastdds_udp.xml     forces DDS onto UDP so topics cross container boundaries
+  launch/             ROS 2 launch files (bridge, MAVROS)
+
+tests/              test_boat_drive.py — the automated drive test
+docs/               Guides and build history
+```
+
+---
+
+## Documentation
+
+| Guide | Read it when |
+|---|---|
+| [docs/ros2-development.md](docs/ros2-development.md) | You're writing ROS 2 nodes or Nav2 against the sim. **Start here.** |
+| [docs/y_boat_core-integration.md](docs/y_boat_core-integration.md) | You want your `y_boat_core` autonomy stack driving this boat. |
+| [docs/platforms.md](docs/platforms.md) | Setting up Linux, Windows/WSL2 or macOS; or running headless/CI. |
+| [docs/troubleshooting.md](docs/troubleshooting.md) | Something didn't come up. |
+| [docs/](docs/README.md) | Build history and step reports. |
+
+---
+
+## Why We Use These Three Core Tools
 
 | Tool | Role | Why We Chose It | How It Helps Us |
 |---|---|---|---|
 | **Gazebo Harmonic** | **Virtual Lake** *(Physics & World)* | Accurate fluid dynamics, water buoyancy, wave interaction (`asv_wave_sim`), and thruster response. | Replaces the physical lake. Allows testing collision avoidance, rough water stability, and thruster limits with zero risk to hardware. |
 | **ArduPilot SITL + Terminal** | **Autopilot Brain** *(Low-Level Control)* | Line-for-line identical firmware (`Rover-4.7.1`) to the real boat's Pixhawk/Cube computer. Battle-tested EKF3 state estimation and skid-steer thruster mixing. | Any ROS 2 autonomy code that works in SITL works on the physical boat with zero firmware changes. The terminal gives engineers instant access to change modes (`mode GUIDED`), arm thrusters, and tune 1,000+ parameters live. |
 | **QGroundControl (QGC)** | **Shore Station** *(Operator Mission Control)* | Global standard ground control station communicating over MAVLink (UDP 14550). Rich satellite map, HUD, battery voltage, and waypoint planner. | Gives human operators complete situational awareness. Allows drawing and uploading autonomous GPS waypoint routes for competition tasks, plus instant safety overrides (Return-to-Launch or manual joystick takeover). |
-
----
-
-## Prerequisites by Operating System
-
-### 1. Linux (Native)
-- **Docker**: Docker Engine 24.0+ (`sudo apt install docker.io` or official Docker repository).
-- **Docker Permissions**: Ensure your user is in the docker group: `sudo usermod -aG docker $USER` (log out and back in).
-- **GPU Driver**:
-  - *NVIDIA*: Install NVIDIA drivers and `nvidia-container-toolkit` (`sudo apt install nvidia-container-toolkit`).
-  - *Intel / AMD*: Works out of the box via `/dev/dri`.
-  - *No GPU*: Falls back automatically to CPU software rendering.
-
-### 2. Windows 10/11 (WSL2)
-- **WSL2 with WSLg** (standard on Windows 11 and updated Windows 10). Run `wsl --update` from PowerShell if needed.
-- **NVIDIA GPU Driver for Windows**: Install the regular Windows NVIDIA driver from nvidia.com. *Do not install Linux display drivers inside WSL2* (Windows forwards GPU acceleration automatically via DirectX `/dev/dxg`).
-- **Docker Desktop for Windows**:
-  1. Open Docker Desktop **Settings -> General** $\rightarrow$ verify *"Use the WSL 2 based engine"* is checked.
-  2. Open **Settings -> Resources -> WSL Integration** $\rightarrow$ turn on integration for your Ubuntu/Linux distro.
-
-### 3. macOS (Apple Silicon M1–M4 & Intel)
-- **Docker Desktop for Mac**: Installed and running.
-- **Apple Silicon (M1/M2/M3/M4)**: In Docker Desktop **Settings -> General**, ensure *"Use Rosetta for x86/amd64 emulation on Apple Silicon"* is checked.
-- **Optional Native GCS**: Download [QGroundControl v5.1.4 for macOS (.dmg)](https://github.com/mavlink/qgroundcontrol/releases/download/v5.1.4/QGroundControl.dmg).
-
----
-
-## Step-by-Step Quickstart
-
-### Step 1: Clone the Repository
-Open a terminal (in WSL, open your Ubuntu shell) and clone into your Linux home directory:
-
-```bash
-git clone <your-sim-repo-url> ~/y_sim
-cd ~/y_sim
-```
-
-> [!IMPORTANT]
-> **Windows WSL Users**: Always clone the repository inside the Linux filesystem (e.g. `~/y_sim`), **never** inside the Windows mount (`/mnt/c/...`). The `/mnt/c` drive has much slower file I/O and does not support Linux file sockets or POSIX permissions.
-
----
-
-### Step 2: Obtain the Simulation Image (3 Ways)
-
-Choose the method that fits your situation:
-
-#### Option A: Pull Prebuilt from Docker Hub (Fastest, ~1–2 minutes) — *Recommended for Teammates*
-Instead of burning 15–20 minutes compiling ArduPilot and Gazebo plugins from source on every laptop, pull the  prebuilt image:
-
-```bash
-docker pull jenbensen17/y_boat_sim:latest
-```
-*(Or simply run `./run_sim.sh` — if the image isn't local, it will automatically pull it from Docker Hub and tag it for you!)*`
-
-#### Option B: Build Locally from Source (~5–7 minutes)
-If you are developing Dockerfile customizations or building completely from scratch:
-
-```bash
-./build_sim.sh
-```
-*(The Dockerfile is optimized with shallow git clones, BuildKit parallelization, and skips wxPython source compilation, cutting build time from 20 minutes down to ~5–7 minutes. On Apple Silicon Macs, `--platform linux/amd64` is enforced automatically).*
-
----
-
-### Step 3: Launch the Simulator
-Start the entire simulation stack with a single command:
-
-```bash
-./run_sim.sh
-```
-
-#### What opens automatically:
-Exactly **3 graphical windows** will appear on your desktop:
-1. **Gazebo Sim GUI**: 3D visual simulation showing the BlueBoat floating in calm water.
-2. **QGroundControl**: Ground station displaying live vehicle telemetry, battery status, satellite lock, and the vehicle on the map.
-3. **ArduPilot Terminal (`xterm`)**: An interactive MAVProxy console (`MANUAL> ` prompt) connected to the simulated autopilot. You can type commands directly here (e.g., `mode GUIDED`, `arm throttle`, `param show`).
-
-The terminal where you ran `./run_sim.sh` supervises the container. Press **`Ctrl+C`** in that terminal at any time to cleanly shut down all simulator processes and release ports.
-
-> [!TIP]
-> **Gazebo 3D lagging on Windows WSL2 or laptops?**
-> You can disable Gazebo's heavy 3D window while **keeping QGroundControl and ArduPilot terminal active**:
-> ```bash
-> ./run_sim.sh --no-gz-gui
-> ```
-> Gazebo's physics and hydrodynamics run headless at full 1000 Hz with almost zero CPU/GPU overhead, while QGroundControl (2D map & telemetry) and the terminal run smoothly at 60 FPS.
-
----
-
-### Step 4: Verify ROS 2 Vehicle Control
-Leave the simulator running, open a **new terminal tab**, and execute:
-
-```bash
-./test_ros.sh
-```
-
-#### What this test performs:
-1. Verifies MAVROS heartbeat and connectivity to the autopilot.
-2. Sets flight mode to `GUIDED` via the `/mavros/set_mode` service.
-3. Arms the vehicle thrusters via `/mavros/cmd/arming` (with automatic pre-arm settling retries).
-4. Streams forward body-frame velocity (`1.5 m/s`) for 8 seconds.
-5. Displays real-time odometry updates and total distance traveled.
-6. Halts the boat and disarms it cleanly.
-
-```
-=================================================================
-                   TEST SUMMARY & RESULTS
-=================================================================
-  Starting Position: (  0.00,   0.30)
-  Ending Position:   ( -0.01,  13.32)
-  Total Distance:     13.02 meters
-  Final Heading:       90.1°
-
-[SUCCESS] The boat successfully armed, drove forward, and updated odometry!
-          You should have seen the boat move in Gazebo and QGroundControl.
-=================================================================
-```
-
----
-
-## Developing ROS 2 Nodes & Nav2
-
-### Entering the Container
-To run ROS 2 CLI tools (`ros2 topic`, `ros2 service`, `ros2 node`) or run your custom nodes against the live simulation:
-
-```bash
-docker exec -it y_boat_sim bash
-```
-
-Inside the container, ROS 2 Jazzy environment variables are pre-sourced.
-
----
-
-### Key Topics & Services Reference
-
-| Topic / Service | Interface Type | Purpose / Description |
-|---|---|---|
-| `/clock` | `rosgraph_msgs/msg/Clock` | Simulation clock (~940 Hz). All nodes **must** use `use_sim_time:=True`. |
-| `/mavros/state` | `mavros_msgs/msg/State` | Autopilot state: `connected`, `armed`, and `mode`. |
-| `/mavros/local_position/odom` | `nav_msgs/msg/Odometry` | EKF estimated position and velocity. |
-| `/sim/ground_truth/odom` | `nav_msgs/msg/Odometry` | Simulator ground truth (for debugging / benchmarking). |
-| `/mavros/setpoint_raw/local` | `mavros_msgs/msg/PositionTarget` | **Primary velocity control target for Nav2** (see details below). |
-| `/mavros/set_mode` | `mavros_msgs/srv/SetMode` | Set vehicle flight mode (e.g. `custom_mode: 'GUIDED'`). |
-| `/mavros/cmd/arming` | `mavros_msgs/srv/CommandBool` | Arm or disarm vehicle thrusters (`value: true` or `false`). |
-
----
-
-### Four Critical Rules for Autonomy & Nav2
-
-#### 1. Velocity Control Frame (Body Frame vs. Local ENU)
-- **Do NOT publish velocity to `/mavros/setpoint_velocity/cmd_vel_unstamped`** — MAVROS interprets that topic in the fixed **Local ENU** frame (the boat will travel north/east regardless of where its bow is pointed).
-- **Use `/mavros/setpoint_raw/local`** with `mavros_msgs/msg/PositionTarget`:
-  - `coordinate_frame = 8` (`FRAME_BODY_NED`).
-  - `type_mask = 1479` (ignores position, acceleration, and yaw; keeps `velocity` + `yaw_rate`).
-  - `velocity.x` = Forward speed in m/s (body frame).
-  - `yaw_rate` = Turning rate in rad/s.
-
-#### 2. The 3-Second Guided Timeout
-ArduPilot Rover has a hardcoded **3000 ms** timeout on guided velocity targets. If no setpoint is received within 3 seconds, ArduPilot automatically halts the boat.
-- Any controller or Nav2 bridge **must publish setpoints continuously at $\ge 10\text{ Hz}$**.
-- When the boat should remain stationary in GUIDED mode, stream zero-velocity setpoints (`vx=0.0, yaw_rate=0.0`) as keepalives.
-
-#### 3. Simulation Clock Synchronization
-The simulator publishes `/clock` straight from Gazebo's physics engine.
-- Every ROS 2 node, launch file, and Nav2 instance must run with:
-  ```python
-  parameters=[{'use_sim_time': True}]
-  ```
-
-#### 4. TF Transform Tree
-- MAVROS publishes static transforms (`map_ned`, `odom_ned`, `base_link_frd`), but does not publish dynamic transforms (`map -> odom -> base_link`).
-- Before launching Nav2, either enable MAVROS dynamic TF or run a node that broadcasts `odom -> base_link` from `/mavros/local_position/odom`.
-
----
-
-### Minimal Python Control Example
-
-```python
-import rclpy
-from rclpy.node import Node
-from mavros_msgs.msg import PositionTarget
-
-class BoatVelocityPublisher(Node):
-    def __init__(self):
-        super().__init__('boat_vel_publisher')
-        self.pub = self.create_publisher(PositionTarget, '/mavros/setpoint_raw/local', 10)
-        self.timer = self.create_timer(0.1, self.send_cmd) # 10 Hz stream
-
-    def send_cmd(self):
-        msg = PositionTarget()
-        msg.header.stamp = self.get_clock().now().to_msg()
-        msg.coordinate_frame = PositionTarget.FRAME_BODY_NED # 8
-        # Mask out position, acceleration, and yaw (keep velocity.x and yaw_rate)
-        msg.type_mask = (PositionTarget.IGNORE_PX | PositionTarget.IGNORE_PY | PositionTarget.IGNORE_PZ |
-                         PositionTarget.IGNORE_AFX | PositionTarget.IGNORE_AFY | PositionTarget.IGNORE_AFZ |
-                         PositionTarget.IGNORE_YAW)
-        msg.velocity.x = 1.5   # 1.5 m/s forward
-        msg.yaw_rate = 0.0     # 0.0 rad/s
-        self.pub.publish(msg)
-
-def main():
-    rclpy.init()
-    node = BoatVelocityPublisher()
-    rclpy.spin(node)
-    rclpy.shutdown()
-
-if __name__ == '__main__':
-    main()
-```
-
----
-
-### Giving Waypoint Missions (3 Methods)
-
-There are three ways to command waypoint missions on the BlueBoat:
-
-#### Method 1: The Visual Way in QGroundControl (Recommended for Testing & Demos)
-1. **Open Plan Screen**: Click the **Plan** icon (paper & pencil icon, top-left).
-2. **Create or Load Waypoints**:
-   - *Manual*: Click **Waypoint** on the left menu, then click anywhere on the lake map to drop points (WP 1, WP 2, WP 3...). On the right panel, configure vessel speed (e.g. `1.5 m/s`).
-   - *Sample Mission File*: Click **File** $\rightarrow$ **Open** and select [blueboat_mission.txt](file:///home/jenbensen/y_boat/sim_scratch/blueboat_mission.txt) (a pre-configured 25-meter rectangular search pattern on the lake).
-3. **Upload to the Boat**: Click the **Upload** button (yellow upward arrow, top-right). This transmits the mission over MAVLink directly into ArduPilot SITL's memory.
-4. **Execute the Mission**: Switch back to the **Fly / Drive View** (paper airplane icon) and slide the bottom confirmation bar: **Slide to Start Mission** (or switch Mode to `AUTO`). The boat will autonomously arm and follow the path!
-
-#### Method 2: The Fast Way in the ArduPilot Terminal (MAVProxy CLI)
-Inside the `xterm` ArduPilot SITL terminal:
-```text
-MANUAL> wp load /home/simuser/sim_scratch/blueboat_mission.txt
-Loaded 5 waypoints from blueboat_mission.txt
-
-MANUAL> mode AUTO
-AUTO> arm throttle
-```
-- `wp list` — view coordinates of all stored waypoints.
-- `wp clear` — erase all waypoints from flight controller memory.
-- `mode MANUAL` / `mode RTL` — disengage mission or return to home launch position.
-
-#### Method 3: Programmatically via ROS 2
-- **Dynamic Setpoints in `GUIDED` Mode**: Publish `geometry_msgs/msg/PoseStamped` coordinates directly to `/mavros/setpoint_position/local`.
-- **Upload Waypoint List**: Use the MAVROS service `/mavros/mission/push` (`mavros_msgs/srv/WaypointPush`), then call `/mavros/set_mode` with `custom_mode='AUTO'`.
-
----
-
-## Connecting with y_boat_core: Live Simulation & Sim-to-Real Parity
-
-A common question is: *How does code running inside `y_boat_core` (`boat_dev`) communicate with and update `y_sim` (`y_boat_sim`)?*
-
-The two containers do not copy or touch each other's files. Instead, they run side-by-side on your host machine and communicate live across the **ROS 2 network via DDS (Data Distribution Service)**, functioning exactly like two physical computers connected over an Ethernet switch.
-
-### Network Architecture & DDS Data Flow
-
-Both containers are configured with `network_mode: host` and `ROS_DOMAIN_ID=10`. This allows ROS 2 Jazzy DDS discovery to find topics automatically across container boundaries:
-
-```text
- ┌──────────────────────────────────────┐             ┌──────────────────────────────────────┐
- │       Container 1: boat_dev          │             │       Container 2: y_boat_sim        │
- │            (y_boat_core)             │             │               (y_sim)                │
- │                                      │             │                                      │
- │  Your Autonomy / Navigation Nodes    │             │  Gazebo + ArduPilot SITL + MAVROS    │
- │                                      │   ROS 2     │                                      │
- │  Listens to:                         │   DDS       │  Publishes:                          │
- │    • /mavros/local_position/odom     │◄────────────│    • Simulated GPS & IMU Odometry    │
- │    • /mavros/state (armed / mode)    │◄────────────│    • Autopilot status                │
- │    • /clock (simulated time)         │◄────────────│    • Physics clock                   │
- │                                      │             │                                      │
- │  Publishes:                          │             │  Acts on:                            │
- │    • /mavros/setpoint_raw/local      │────────────►│    • Controls thrusters & boat moves │
- │    • /mavros/setpoint_position/local │────────────►│    • Navigates to target position    │
- └──────────────────────────────────────┘             └──────────────────────────────────────┘
-                                                                         │
-                                                                         ▼
-                                                       Live in Gazebo & QGroundControl:
-                                                       You see the boat drive on screen!
-```
-
-### Standard Development Workflow
-
-1. **Terminal 1 — Launch the Simulator**:
-   ```bash
-   cd ~/y_sim
-   ./run_sim.sh
-   # (or ./run_sim.sh --no-gz-gui for headless physics with GUI QGC)
-   ```
-   *Gazebo, QGroundControl, and ArduPilot SITL start and broadcast telemetry on `ROS_DOMAIN_ID=10`.*
-
-2. **Terminal 2 — Start the Autonomy Dev Container**:
-   ```bash
-   cd ~/y_boat/y_boat_core
-   ./scripts/run.sh
-   docker exec -it boat_dev bash
-   ```
-
-3. **Inside `boat_dev` — Build and Run Your Autonomy Stack**:
-   ```bash
-   ros2 run my_navigation_pkg waypoint_follower
-   ```
-   - As your node calculates commands and publishes velocity or position setpoints, the boat in **`y_sim` immediately responds and drives through the water**.
-   - QGroundControl and Gazebo reflect the boat's movements, thruster plumes, and GPS track in real time.
-
-### The Big Architectural Benefit: "Sim-to-Real" Parity
-
-This strict separation between the vehicle simulation (`y_sim`) and the autonomy stack (`y_boat_core`) gives the team complete **Sim-to-Real Parity**:
-
-| Environment | Autonomy Stack | Hardware / Simulation Backend | MAVROS Interface |
-|---|---|---|---|
-| **Simulation (Lab / Laptop)** | `boat_dev` (`y_boat_core`) | Gazebo Harmonic + ArduPilot SITL (`y_sim`) | Same `/mavros/...` topics |
-| **Real Lake (Physical Vessel)** | `boat_dev` (on Jetson Nano) | Physical BlueBoat Pixhawk 6C Autopilot | Same `/mavros/...` topics |
-
-Because both the simulation and the real vessel expose the identical MAVROS ROS 2 API and coordinate frames, **your autonomy, perception, and Nav2 software runs on the real boat with zero code changes**.
-
----
-
-## Platform-Specific Guides
-
-### Windows WSL2 Setup Details
-1. **WSLg (GUI)**: Windows 11 and updated Windows 10 include WSLg, which automatically renders X11 and Wayland windows directly on the Windows desktop with hardware acceleration.
-2. **GPU Acceleration**: The launcher automatically detects `/dev/dxg` and passes it to Docker. DirectX 12 hardware acceleration is enabled without any configuration.
-3. **Troubleshooting WSLg Display**: If windows do not appear, open PowerShell and update WSL:
-   ```powershell
-   wsl --update
-   wsl --shutdown
-   ```
-   Then reopen your WSL terminal and relaunch `./run_sim.sh`.
-
----
-
-### macOS Workflows
-
-#### Workflow 1: Headless Sim + Native macOS QGroundControl *(Recommended for Mac)*
-This gives the fastest performance and full Apple Metal 60 FPS GPU rendering on Retina displays:
-1. Start the simulation in headless mode:
-   ```bash
-   HEADLESS=1 ./run_sim.sh
-   ```
-2. Download [QGroundControl v5.1.4 for macOS (.dmg)](https://github.com/mavlink/qgroundcontrol/releases/download/v5.1.4/QGroundControl.dmg), install it to `/Applications`, and open it. It auto-connects to the simulator on `127.0.0.1:14550`.
-3. In a second terminal, verify with `./test_ros.sh`.
-
-#### Workflow 2: Full 3-Window GUI via XQuartz
-To see the 3D Gazebo window on macOS:
-1. Install XQuartz: `brew install --cask xquartz`.
-2. Open XQuartz $\rightarrow$ **Settings -> Security** $\rightarrow$ check **"Allow connections from network clients"**.
-3. In Mac terminal: `xhost + 127.0.0.1`.
-4. Run `./run_sim.sh`. The launcher routes display traffic to `host.docker.internal:0` automatically.
-
----
-
-### Headless / Cloud / CI Mode
-If running on a remote cloud server (AWS, GCP), via SSH without X11 forwarding, or in a GitHub Actions runner:
-
-```bash
-HEADLESS=1 ./run_sim.sh
-```
-
-The script automatically detects an empty `$DISPLAY` environment variable and falls back to headless mode. Gazebo physics, ArduPilot SITL, and all ROS 2 topics run at full speed.
 
 ---
 
@@ -428,5 +124,3 @@ docker exec -it y_boat_sim bash
 # Stop the simulation container from another terminal
 docker stop y_boat_sim
 ```
-
----

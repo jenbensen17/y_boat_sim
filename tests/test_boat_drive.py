@@ -186,7 +186,7 @@ def main():
 
     if not node.wait_for_connection(timeout=30.0):
         print("\n[ERROR] Could not connect to /mavros/state or /mavros/local_position/odom!")
-        print("Please ensure the simulator is running with: ./sim_scratch/run_sim_scratch.sh")
+        print("Please ensure the simulator is running with: ./run_sim.sh")
         rclpy.shutdown()
         return 1
 

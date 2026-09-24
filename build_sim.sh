@@ -26,17 +26,15 @@ echo "======================================================================"
 
 DOCKER_BUILDKIT=1 docker build ${PLATFORM_ARG} -t "${IMAGE}" -f "${SCRIPT_DIR}/Dockerfile.sim" "${SCRIPT_DIR}"
 
-# Ensure both Docker Hub and local scratch tags exist
-if [ "${IMAGE}" = "y_boat_sim_scratch:1c" ]; then
-    docker tag "${IMAGE}" yrobotics/y_boat_sim:latest 2>/dev/null || true
-    docker tag "${IMAGE}" yrobotics/y_boat_sim:1c 2>/dev/null || true
-else
-    docker tag "${IMAGE}" y_boat_sim_scratch:1c 2>/dev/null || true
-fi
+# Keep the local scratch tag and the Docker Hub tags pointing at this build,
+# so run_sim.sh finds it whichever name it looks for first.
+docker tag "${IMAGE}" y_boat_sim_scratch:1c        2>/dev/null || true
+docker tag "${IMAGE}" jenbensen17/y_boat_sim:latest 2>/dev/null || true
+docker tag "${IMAGE}" jenbensen17/y_boat_sim:1c     2>/dev/null || true
 
 echo ""
 echo "======================================================================"
 echo "[build] SUCCESS! Image '${IMAGE}' built successfully."
 echo "[build] You can now launch the simulator with:"
-echo "        ./sim_scratch/run_sim_scratch.sh"
+echo "        ./run_sim.sh"
 echo "======================================================================"
