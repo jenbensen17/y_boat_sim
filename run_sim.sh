@@ -143,8 +143,38 @@ GPU_ARGS=()
 GLX_VENDOR="${GLX_VENDOR:-}"
 NV_PRIME="${NV_PRIME:-}"
 
-if docker info 2>/dev/null | grep -iE "runtimes:.*nvidia" >/dev/null 2>&1 || \
-   (command -v nvidia-smi >/dev/null 2>&1 && docker run --rm --gpus all ubuntu:latest true >/dev/null 2>&1); then
+# A registered 'nvidia' Docker runtime does NOT mean this machine has an NVIDIA
+# GPU (the toolkit is often installed on machines that have none, and the WSL
+# nvidia-smi shim exists regardless). Passing --gpus all without a usable GPU
+# makes `docker run` fail outright, so require the driver to actually enumerate
+# a device before going down the NVIDIA path.
+has_nvidia_gpu() {
+    if command -v nvidia-smi >/dev/null 2>&1 && \
+       nvidia-smi -L 2>/dev/null | grep -qE "^GPU [0-9]+:"; then
+        return 0
+    fi
+    # Fall back to the driver device nodes (nvidia-smi may be absent in a
+    # minimal install); these do not exist on WSL2, which uses /dev/dxg.
+    [ "${IS_WSL}" = "0" ] && [ -e "/dev/nvidiactl" ]
+}
+
+# Confirm the container runtime can really hand the GPU through, using an image
+# that is already local so this probe never triggers a pull.
+nvidia_docker_works() {
+    docker info 2>/dev/null | grep -iE "runtimes:.*nvidia" >/dev/null 2>&1 || return 1
+    local probe
+    for probe in "${IMAGE}" ubuntu:latest; do
+        if docker image inspect "${probe}" >/dev/null 2>&1; then
+            docker run --rm --gpus all "${probe}" true >/dev/null 2>&1
+            return $?
+        fi
+    done
+    # Nothing local to probe with: the driver reports a GPU and the runtime is
+    # registered, so trust it.
+    return 0
+}
+
+if has_nvidia_gpu && nvidia_docker_works; then
     echo "[gpu] NVIDIA GPU runtime available. Enabling NVIDIA GPU acceleration."
     GPU_ARGS+=(--gpus all -e NVIDIA_DRIVER_CAPABILITIES=all)
     if [ "${IS_WSL}" = "0" ]; then
@@ -239,6 +269,12 @@ else
     NETWORK_ARGS=(--network host --ipc host)
 fi
 
+# Only forward the NVIDIA GLX hints when we actually selected the NVIDIA path;
+# an empty __GLX_VENDOR_LIBRARY_NAME sends libglvnd looking for "libGLX_.so.0".
+NV_ENV_ARGS=()
+[ -n "${NV_PRIME}" ] && NV_ENV_ARGS+=(-e __NV_PRIME_RENDER_OFFLOAD="${NV_PRIME}")
+[ -n "${GLX_VENDOR}" ] && NV_ENV_ARGS+=(-e __GLX_VENDOR_LIBRARY_NAME="${GLX_VENDOR}")
+
 echo "[launch] Starting container '${CONTAINER_NAME}'..."
 docker run --rm -i ${DOCKER_TTY} --init \
     ${PLATFORM_ARG} \
@@ -246,8 +282,7 @@ docker run --rm -i ${DOCKER_TTY} --init \
     "${GPU_ARGS[@]}" \
     "${NETWORK_ARGS[@]}" \
     -e DISPLAY="${DISPLAY:-}" \
-    -e __NV_PRIME_RENDER_OFFLOAD="${NV_PRIME}" \
-    -e __GLX_VENDOR_LIBRARY_NAME="${GLX_VENDOR}" \
+    "${NV_ENV_ARGS[@]}" \
     -e QT_QPA_PLATFORM="${QT_PLATFORM}" \
     -e GZ_IP="${GZ_IP_ADDR}" \
     -e HEADLESS="${HEADLESS}" \
