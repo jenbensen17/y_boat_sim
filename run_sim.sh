@@ -182,12 +182,18 @@ if has_nvidia_gpu && nvidia_docker_works; then
         [ -z "${GLX_VENDOR}" ] && GLX_VENDOR="nvidia"
         [ -z "${NV_PRIME}" ] && NV_PRIME="1"
     fi
+elif [ "${IS_WSL}" = "1" ] && [ -e "/dev/dxg" ]; then
+    # WSL2 GPU: /dev/dxg alone is not enough. Mesa's d3d12 driver also needs the
+    # Windows-provided libs in /usr/lib/wsl, and /dev/dri (if present on WSL) is only
+    # a stub that leaves Mesa on llvmpipe (CPU rendering) -- this was the "slow in
+    # WSL" cause. So this branch must come BEFORE the generic /dev/dri one.
+    echo "[gpu] WSL2 DirectX (/dev/dxg) found. Enabling D3D12 GPU acceleration."
+    GPU_ARGS+=(--device "/dev/dxg" -v "/usr/lib/wsl:/usr/lib/wsl:ro"
+               -e LD_LIBRARY_PATH="/usr/lib/wsl/lib" -e GALLIUM_DRIVER=d3d12)
+    [ -n "${WSL_GPU_NAME:-}" ] && GPU_ARGS+=(-e MESA_D3D12_DEFAULT_ADAPTER_NAME="${WSL_GPU_NAME}")
 elif [ -d "/dev/dri" ]; then
     echo "[gpu] DRI device (/dev/dri) found. Enabling Intel/AMD GPU acceleration."
     GPU_ARGS+=(--device "/dev/dri")
-elif [ "${IS_WSL}" = "1" ] && [ -e "/dev/dxg" ]; then
-    echo "[gpu] WSL2 DirectX (/dev/dxg) found. Enabling WSLg GPU acceleration."
-    GPU_ARGS+=(--device "/dev/dxg")
 else
     echo "[gpu] No discrete GPU acceleration detected. Using Mesa software rendering."
 fi
