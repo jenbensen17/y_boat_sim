@@ -140,6 +140,7 @@ fi
 
 # --- 3. GPU Acceleration Auto-Detection -----------------------------------
 GPU_ARGS=()
+SOFTWARE_RENDER=0
 GLX_VENDOR="${GLX_VENDOR:-}"
 NV_PRIME="${NV_PRIME:-}"
 
@@ -174,28 +175,86 @@ nvidia_docker_works() {
     return 0
 }
 
-if has_nvidia_gpu && nvidia_docker_works; then
+# On WSL, `--gpus all` only brings CUDA: OpenGL still goes through Mesa, which
+# without the d3d12 driver below renders on the CPU. Nothing here needs CUDA, so
+# WSL always takes the D3D12 branch for rendering instead.
+if [ "${IS_WSL}" = "0" ] && has_nvidia_gpu && nvidia_docker_works; then
     echo "[gpu] NVIDIA GPU runtime available. Enabling NVIDIA GPU acceleration."
     GPU_ARGS+=(--gpus all -e NVIDIA_DRIVER_CAPABILITIES=all)
-    if [ "${IS_WSL}" = "0" ]; then
-        # Native Linux hybrid laptop GPUs require explicit vendor selection
-        [ -z "${GLX_VENDOR}" ] && GLX_VENDOR="nvidia"
-        [ -z "${NV_PRIME}" ] && NV_PRIME="1"
-    fi
+    # Native Linux hybrid laptop GPUs require explicit vendor selection
+    [ -z "${GLX_VENDOR}" ] && GLX_VENDOR="nvidia"
+    [ -z "${NV_PRIME}" ] && NV_PRIME="1"
 elif [ "${IS_WSL}" = "1" ] && [ -e "/dev/dxg" ]; then
     # WSL2 GPU: /dev/dxg alone is not enough. Mesa's d3d12 driver also needs the
     # Windows-provided libs in /usr/lib/wsl, and /dev/dri (if present on WSL) is only
     # a stub that leaves Mesa on llvmpipe (CPU rendering) -- this was the "slow in
     # WSL" cause. So this branch must come BEFORE the generic /dev/dri one.
-    echo "[gpu] WSL2 DirectX (/dev/dxg) found. Enabling D3D12 GPU acceleration."
-    GPU_ARGS+=(--device "/dev/dxg" -v "/usr/lib/wsl:/usr/lib/wsl:ro"
-               -e LD_LIBRARY_PATH="/usr/lib/wsl/lib" -e GALLIUM_DRIVER=d3d12)
-    [ -n "${WSL_GPU_NAME:-}" ] && GPU_ARGS+=(-e MESA_D3D12_DEFAULT_ADAPTER_NAME="${WSL_GPU_NAME}")
+    #
+    # Append to the image's LD_LIBRARY_PATH rather than replacing it: the image
+    # puts the gz_ws libs (e.g. libgz-waves1) there, and clobbering it breaks the
+    # waves plugins.
+    IMAGE_LD_PATH="$(docker image inspect "${IMAGE}" --format '{{range .Config.Env}}{{println .}}{{end}}' 2>/dev/null \
+                     | sed -n 's/^LD_LIBRARY_PATH=//p' | sed 's/:*$//')"
+    D3D12_ARGS=(--device "/dev/dxg" -v "/usr/lib/wsl:/usr/lib/wsl:ro"
+                -e LD_LIBRARY_PATH="${IMAGE_LD_PATH:+${IMAGE_LD_PATH}:}/usr/lib/wsl/lib" -e GALLIUM_DRIVER=d3d12)
+
+    # A broken Windows GPU driver (nvidia-smi segfaulting on the host is the tell)
+    # makes every GL client segfault inside libd3d12core, taking Gazebo down with it.
+    # Probe each candidate adapter and fall back to software rendering if none comes
+    # up. Mesa's default adapter comes first; on hybrid laptops, if that's a broken
+    # dGPU, the vendor names (substring match on the adapter name) let the iGPU take over.
+    probe_d3d12() {  # $1 = adapter name ("" for Mesa's default); prints the renderer
+        local adapter_env=()
+        [ -n "$1" ] && adapter_env=(-e MESA_D3D12_DEFAULT_ADAPTER_NAME="$1")
+        docker run --rm --entrypoint glxinfo "${D3D12_ARGS[@]}" "${adapter_env[@]}" \
+            -e DISPLAY="${DISPLAY}" "${DISPLAY_MOUNTS[@]}" "${IMAGE}" -B 2>/dev/null \
+            | sed -n 's/.*renderer string: *//p' | grep -i "D3D12"
+    }
+    D3D12_ADAPTER=""
+    D3D12_RENDERER=""
+    if [ "${HEADLESS}" = "1" ] || ! docker image inspect "${IMAGE}" >/dev/null 2>&1; then
+        # Nothing to draw on, or no local image to probe with: trust the default.
+        D3D12_ADAPTER="${WSL_GPU_NAME:-}"
+        D3D12_RENDERER="unprobed"
+    elif [ -n "${WSL_GPU_NAME:-}" ]; then
+        D3D12_ADAPTER="${WSL_GPU_NAME}"
+        D3D12_RENDERER="$(probe_d3d12 "${WSL_GPU_NAME}")"
+    else
+        for candidate in "" Intel AMD NVIDIA; do
+            D3D12_RENDERER="$(probe_d3d12 "${candidate}")" && { D3D12_ADAPTER="${candidate}"; break; }
+        done
+    fi
+    if [ -n "${D3D12_RENDERER}" ]; then
+        echo "[gpu] WSL2 DirectX (/dev/dxg) found. Enabling D3D12 GPU acceleration (${D3D12_RENDERER})."
+        GPU_ARGS+=("${D3D12_ARGS[@]}")
+        [ -n "${D3D12_ADAPTER}" ] && GPU_ARGS+=(-e MESA_D3D12_DEFAULT_ADAPTER_NAME="${D3D12_ADAPTER}")
+    else
+        echo "[gpu] WSL2 D3D12 probe failed on every adapter (Windows GPU driver crashed or unavailable)."
+        echo "[gpu]   Using Mesa software rendering (slow). Try 'wsl --update' and reinstalling the"
+        echo "[gpu]   Windows GPU driver; check with 'nvidia-smi' / 'glxinfo -B' in WSL."
+        SOFTWARE_RENDER=1
+    fi
 elif [ -d "/dev/dri" ]; then
     echo "[gpu] DRI device (/dev/dri) found. Enabling Intel/AMD GPU acceleration."
     GPU_ARGS+=(--device "/dev/dri")
+    # The container runs as a non-root user, which can only open the render nodes
+    # if it shares their group (usually 'render' or 'video'). Without this, Mesa
+    # silently falls back to llvmpipe even though the device is passed through.
+    for gid in $(stat -c '%g' /dev/dri/renderD* /dev/dri/card* 2>/dev/null | sort -u); do
+        [ "${gid}" != "0" ] && GPU_ARGS+=(--group-add "${gid}")
+    done
 else
     echo "[gpu] No discrete GPU acceleration detected. Using Mesa software rendering."
+    SOFTWARE_RENDER=1
+fi
+
+# On CPU rendering the full wave world can't hold real time (RTF swings 0.2-1.0),
+# so default to the lite world (static water mesh, coarser wave field). An explicit
+# WORLD always wins.
+if [ "${SOFTWARE_RENDER}" = "1" ] && [ -z "${WORLD:-}" ]; then
+    WORLD="/home/simuser/sim_scratch/sim/blueboat_waves_lite.sdf"
+    echo "[gpu] Software rendering: using the lite world (sim/blueboat_waves_lite.sdf)."
+    echo "[gpu]   Set WORLD=/home/simuser/sim_scratch/sim/blueboat_waves.sdf to force the full one."
 fi
 
 # --- 4. Network & Port Verification ---------------------------------------
@@ -297,6 +356,7 @@ docker run --rm -i ${DOCKER_TTY} --init \
     -e WITH_ROS="${WITH_ROS:-1}" \
     -e QGC="${QGC}" \
     -e HOME_LOCATION="${HOME_LOCATION:-}" \
+    -e WORLD="${WORLD:-}" \
     -e ROS_DOMAIN_ID="${ROS_DOMAIN_ID:-10}" \
     -e FASTRTPS_DEFAULT_PROFILES_FILE="/home/simuser/sim_scratch/sim/fastdds_udp.xml" \
     -e RMW_FASTRTPS_USE_QOS_FROM_XML=1 \

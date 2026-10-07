@@ -193,7 +193,15 @@ if [ "${QGC}" = "1" ]; then
     else
         # Same display environment as Gazebo (DISPLAY + the X11 socket mount come from
         # run_sim.sh); QT_QPA_PLATFORM=xcb keeps Qt off Wayland under XWayland.
-        QT_QPA_PLATFORM="${QT_QPA_PLATFORM:-xcb}" qgroundcontrol \
+        # On WSL, QGC segfaults under Mesa's d3d12 driver (and its GStreamer nvcodec
+        # plugin crashes on the CUDA stubs in /usr/lib/wsl/lib), so run it on llvmpipe
+        # with the WSL libs stripped from its path; it's a 2D app and doesn't need the GPU.
+        QGC_ENV=()
+        if [ "${GALLIUM_DRIVER:-}" = "d3d12" ]; then
+            QGC_LD_PATH="$(printf '%s' "${LD_LIBRARY_PATH:-}" | tr ':' '\n' | grep -v '^/usr/lib/wsl' | paste -sd: -)"
+            QGC_ENV=(GALLIUM_DRIVER=llvmpipe LD_LIBRARY_PATH="${QGC_LD_PATH}")
+        fi
+        env "${QGC_ENV[@]}" QT_QPA_PLATFORM="${QT_QPA_PLATFORM:-xcb}" qgroundcontrol \
             > /tmp/qgc.log 2>&1 &
         QGC_PID=$!
         echo "[launch] QGroundControl started (pid ${QGC_PID}), log: /tmp/qgc.log"
