@@ -5,7 +5,7 @@
 # which connects to MAVROS, sets mode to GUIDED, arms the boat, drives forward
 # using body-frame velocity, and verifies odometry movement.
 #
-# Run it from the host machine, in a second terminal, while the sim is up:
+# Run it in a second terminal while the sim is up (native install or Docker):
 #   ./test_ros.sh
 #
 set -euo pipefail
@@ -13,10 +13,14 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONTAINER_NAME="${CONTAINER_NAME:-y_boat_sim}"
 
-if [ -f "/.dockerenv" ]; then
-    # We are inside the container: run the test python script directly
-    source /opt/ros/jazzy/setup.bash
+if [ -f "/opt/ros/jazzy/setup.bash" ]; then
+    # ROS 2 Jazzy is installed here (native install via setup_native.sh, or inside the
+    # sim container): run the test directly, with the same DDS settings as the sim.
+    # ROS's setup.bash references unset variables, so relax `set -u` across it.
+    set +u; source /opt/ros/jazzy/setup.bash; set -u
     export ROS_DOMAIN_ID="${ROS_DOMAIN_ID:-10}"
+    export FASTRTPS_DEFAULT_PROFILES_FILE="${FASTRTPS_DEFAULT_PROFILES_FILE:-${SCRIPT_DIR}/sim/fastdds_udp.xml}"
+    export RMW_FASTRTPS_USE_QOS_FROM_XML=1
     python3 "${SCRIPT_DIR}/tests/test_boat_drive.py" "$@"
 else
     # We are on the host: check if the simulation container is running

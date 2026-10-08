@@ -12,13 +12,15 @@ It packages **Gazebo Harmonic**, **ArduPilot SITL (`Rover-4.7.1`)**, **`asv_wave
 
 ## Quickstart
 
-Three commands. The launcher pulls the image if you don't have it, and detects your
-OS, GPU and display on its own.
+The sim installs natively on **Ubuntu 24.04**, so Gazebo runs as a normal app on your
+GPU. On Windows that means a WSL2 Ubuntu 24.04 distro; in PowerShell:
+`wsl --install -d Ubuntu-24.04`.
 
 ```bash
 git clone git@github.com:jenbensen17/y_boat_sim.git ~/y_sim
 cd ~/y_sim
-./run_sim.sh
+./setup_native.sh     # once: ~20-40 min, asks for your sudo password
+./start_sim.sh
 ```
 
 Then, in a second terminal, verify that ROS 2 can drive the boat:
@@ -27,12 +29,15 @@ Then, in a second terminal, verify that ROS 2 can drive the boat:
 ./test_ros.sh
 ```
 
-That's it. Press `Ctrl+C` in the first terminal to shut everything down cleanly.
+Press `Ctrl+C` in the first terminal to shut everything down cleanly.
 
 > [!IMPORTANT]
 > **Windows/WSL users**: clone inside the Linux filesystem (`~/y_sim`), **never**
-> under `/mnt/c/...`. See [docs/platforms.md](docs/platforms.md) for per-OS
-> prerequisites.
+> under `/mnt/c/...`. Check Gazebo will use your GPU with
+> `glxinfo -B | grep "renderer string"`: it should name your GPU, not `llvmpipe`.
+
+Docker (`./run_sim.sh`) still works but depends on GPU/display passthrough, which is
+fragile; prefer the native install.
 
 ### What opens
 
@@ -44,7 +49,7 @@ Three windows appear on your desktop:
 
 > [!TIP]
 > If the Gazebo 3D window is slow on a laptop or under WSL2, run
-> `./run_sim.sh --no-gz-gui`. Physics keeps running at full rate; you keep QGC and
+> `GZ_GUI=0 ./start_sim.sh`. Physics keeps running at full rate; you keep QGC and
 > the terminal.
 
 ---
@@ -55,7 +60,9 @@ Everything at the top level is something **you run on your machine**. Everything
 `sim/` runs **inside the container** and you rarely need to touch it.
 
 ```
-run_sim.sh          Start the simulator.  ← the one you'll use
+setup_native.sh     One-time native install (Ubuntu 24.04).
+start_sim.sh        Start the simulator.  ← the one you'll use
+run_sim.sh          Docker launcher (alternative to the native install).
 build_sim.sh        Build the Docker image from source (optional; run_sim.sh pulls it).
 test_ros.sh         Run the ROS 2 verification test against a running sim.
 Dockerfile.sim      The image definition.

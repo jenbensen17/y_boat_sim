@@ -28,6 +28,9 @@ HOME_LOCATION="${HOME_LOCATION:-40.2386,-111.8000,1368,0}"
 MAVLINK_OUTS="${MAVLINK_OUTS:-127.0.0.1:14550 127.0.0.1:14551}"
 MAVROS_FCU_URL="${MAVROS_FCU_URL:-udp://127.0.0.1:14551@}"
 HEADLESS="${HEADLESS:-0}"
+# Native installs (setup_native.sh) put ArduPilot under ~/blueboat_deps; the Docker
+# image keeps it at ~/ardupilot.
+ARDUPILOT_DIR="${ARDUPILOT_DIR:-${HOME}/ardupilot}"
 WITH_ROS="${WITH_ROS:-1}"
 # QGroundControl is ON by default: the intended default experience is Gazebo + the
 # ArduPilot/MAVProxy console + QGC showing the boat on the map. It auto-connects to
@@ -149,7 +152,7 @@ if [ "${HEADLESS}" = "1" ]; then
     # --daemon is essential: with no terminal (cron, `docker exec -d`, CI) MAVProxy's
     # console reads stdin, hits immediate EOF, exits, and sim_vehicle.py then tears down
     # the vehicle binary too. --daemon runs MAVProxy with no console so it survives.
-    ( cd "${HOME}/ardupilot" && unset DISPLAY && \
+    ( cd "${ARDUPILOT_DIR}" && unset DISPLAY && \
         sim_vehicle.py "${SITL_ARGS[@]}" --mavproxy-args="--daemon" ) &
     SITL_PID=$!
 else
@@ -160,7 +163,7 @@ else
     # Result: exactly 3 GUI windows total (Gazebo, QGroundControl, and ArduPilot terminal).
     export SITL_RITW_TERMINAL="sh"
     xterm -T "ArduPilot (MAVProxy)" -geometry 110x32 -sb -sl 2000 -e bash -c \
-        "cd '${HOME}/ardupilot' && python3 '${HOME}/ardupilot/Tools/autotest/sim_vehicle.py' ${SITL_ARGS[*]}" &
+        "cd '${ARDUPILOT_DIR}' && python3 '${ARDUPILOT_DIR}/Tools/autotest/sim_vehicle.py' ${SITL_ARGS[*]}" &
     SITL_PID=$!
 fi
 echo "[launch] SITL started in xterm (pid ${SITL_PID})"
