@@ -46,6 +46,11 @@ services:
       SITL_CONSOLE: tmux
       # Set by sim.py: "--render-engine-gui ogre" when rendering on the CPU.
       GZ_GUI_ARGS: ${GZ_GUI_ARGS:-}
+      # Set by sim.py to 1 when rendering on the CPU: flat water instead of the wave mesh.
+      WATER_PLANE: ${WATER_PLANE:-0}
+      # Set by sim.py when rendering on the CPU: render threads for Mesa's llvmpipe.
+      # Its default (one per core) starves the physics/ArduPilot lockstep.
+      CPU_RENDER_THREADS: ${CPU_RENDER_THREADS:-}
     command: /home/simuser/sim_scratch/sim/desktop/start_desktop.sh
 
 volumes:

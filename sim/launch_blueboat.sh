@@ -41,6 +41,9 @@ set +u
 source /opt/ros/jazzy/setup.bash
 set -u
 
+# Models that live in this repo (e.g. blueboat_lite) come first.
+export GZ_SIM_RESOURCE_PATH="${SCRIPT_DIR}/models${GZ_SIM_RESOURCE_PATH:+:${GZ_SIM_RESOURCE_PATH}}"
+
 GZ_PID=""
 SITL_PID=""
 BRIDGE_PID=""
@@ -96,6 +99,28 @@ else
             exit 1
         fi
     done
+fi
+
+# CPU rendering: cap Mesa's llvmpipe threads (its default, one per core, made the
+# physics fall behind real time ~35% of the time; 2 threads keeps it at ~1.0x).
+if [ -n "${CPU_RENDER_THREADS:-}" ]; then
+    export LP_NUM_THREADS="${CPU_RENDER_THREADS}"
+fi
+
+# WATER_PLANE=1 (CPU rendering): draw the water as a flat plane instead of the
+# 256x256 wave mesh. On the CPU renderer it looks the same and roughly doubles
+# Gazebo's frame rate; on a GPU the mesh looks better, so it stays the default.
+if [ "${WATER_PLANE:-0}" = "1" ]; then
+    PLANE_WORLD="/tmp/$(basename "${WORLD%.sdf}")_plane.sdf"
+    python3 - "${WORLD}" "${PLANE_WORLD}" <<'PY'
+import re, sys
+src, dst = sys.argv[1], sys.argv[2]
+sdf = open(src).read()
+sdf = re.sub(r"<mesh>\s*<uri>model://waves/materials/mesh_L256m_N256\.dae</uri>\s*</mesh>",
+             "<plane><normal>0 0 1</normal><size>500 500</size></plane>", sdf)
+open(dst, "w").write(sdf)
+PY
+    WORLD="${PLANE_WORLD}"
 fi
 
 echo "[launch] world:    ${WORLD}"

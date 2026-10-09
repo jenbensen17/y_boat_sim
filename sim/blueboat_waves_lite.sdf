@@ -145,7 +145,10 @@
 
     <include>
       <pose degrees="true">0 0 0 0 0 90</pose>
-      <uri>model://blueboat</uri>
+      <!-- Same boat with simplified visual meshes (sim/models/blueboat_lite); the
+           name keeps topics (/model/blueboat/...) and plugin scoping unchanged. -->
+      <name>blueboat</name>
+      <uri>model://blueboat_lite</uri>
     </include>
 
   </world>

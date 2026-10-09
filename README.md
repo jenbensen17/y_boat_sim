@@ -72,8 +72,10 @@ python sim.py shell               # bash inside the sim, with ROS 2 sourced
 | **macOS** | CPU: Docker on macOS has no GPU access |
 | **Linux** | CPU for now: the container's virtual display can't use the GPU yet |
 
-On the CPU, Gazebo runs at about 10 FPS and can slow the physics. If the boat lags,
-use `python sim.py start --no-gazebo` and follow it in QGroundControl, which is light.
+On the CPU, `sim.py` switches to simpler graphics (the lighter `ogre` renderer, flat
+water, 2 render threads). Gazebo then runs at ~18 FPS while the physics stays at real
+time (measured on an 8-core laptop CPU). If the boat still lags on a slower machine,
+use `python sim.py start --no-gazebo` and follow it in QGroundControl.
 
 If a Windows machine falls back to the CPU, update the Windows GPU driver and run
 `wsl --update` in PowerShell, then try again.
@@ -106,8 +108,17 @@ under 1% of the time.
 - **`/clock` is republished at 50 Hz** (`sim/launch/clock_throttle.py`). Gazebo sends it
   every physics step, and MAVROS's ~59 nodes each process it; at full rate that cost
   ~1.8 cores.
-- **Without a GPU, Gazebo uses the lighter `ogre` renderer** (~1.6× the frame rate of
-  the default `ogre2` on the CPU).
+- **A lightweight BlueBoat** (`sim/models/blueboat_lite`): the same model with its visual
+  meshes simplified from ~277k to ~12.7k triangles. Physics, plugins and topics are
+  unchanged. Rendering the full CAD meshes was what held CPU-only Gazebo to ~9 FPS.
+- **Without a GPU:** the `ogre` renderer instead of `ogre2`, flat water instead of the
+  wave mesh, and Mesa limited to 2 render threads. Its default of one thread per core
+  starved the physics (below 0.8× real time 35% of the time, versus under 1% with 2).
+
+| CPU rendering | Gazebo FPS | Physics below 0.8× real time |
+|---|---|---|
+| Original setup | ~6 | ~10% |
+| Now | ~18 | <1% |
 
 ---
 
@@ -131,6 +142,7 @@ sim/
   bridge.yaml               ros_gz_bridge topic mapping
   fastdds_udp.xml           DDS over UDP only
   launch/                   ROS 2 launch files (bridge, clock throttle, MAVROS)
+  models/blueboat_lite/     the BlueBoat with simplified visual meshes
 
 tests/              test_boat_drive.py, the automated drive test
 docs/               Guides and build history
