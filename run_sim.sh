@@ -22,6 +22,9 @@ if [ -z "${IMAGE:-}" ]; then
     done
 fi
 
+# Defined before the EXIT trap is armed so cleanup() never sees it unset.
+CONTAINER_NAME="${CONTAINER_NAME:-y_boat_sim}"
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Parse optional convenience flags
@@ -218,7 +221,7 @@ elif [ "${IS_WSL}" = "1" ] && [ -e "/dev/dxg" ]; then
         D3D12_RENDERER="unprobed"
     elif [ -n "${WSL_GPU_NAME:-}" ]; then
         D3D12_ADAPTER="${WSL_GPU_NAME}"
-        D3D12_RENDERER="$(probe_d3d12 "${WSL_GPU_NAME}")"
+        D3D12_RENDERER="$(probe_d3d12 "${WSL_GPU_NAME}")" || true
     else
         for candidate in "" Intel AMD NVIDIA; do
             D3D12_RENDERER="$(probe_d3d12 "${candidate}")" && { D3D12_ADAPTER="${candidate}"; break; }
@@ -282,7 +285,6 @@ check_ports() {
 check_ports
 
 # --- 5. Container Lifecycle & Image Verification --------------------------
-CONTAINER_NAME="${CONTAINER_NAME:-y_boat_sim}"
 docker rm -f "${CONTAINER_NAME}" >/dev/null 2>&1 || true
 
 if ! docker image inspect "${IMAGE}" >/dev/null 2>&1; then
