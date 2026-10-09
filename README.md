@@ -6,13 +6,13 @@
 
 The official standalone simulation environment for the **BYU Robotics Association RoboBoat Team**. This repository provides a complete, hardware-in-the-loop-equivalent software simulator for the BlueBoat autonomous surface vessel.
 
-It runs **Gazebo Harmonic**, **ArduPilot SITL (`Rover-4.7.1`)**, **`asv_wave_sim` hydrodynamics**, **`ros_gz_bridge`**, **MAVROS** and **QGroundControl** in one Docker container. You use it through your web browser, so it works the same on **Windows**, **macOS** and **Linux**.
+It runs **Gazebo Harmonic**, **ArduPilot SITL (`Rover-4.7.1`)**, **`asv_wave_sim` hydrodynamics**, **`ros_gz_bridge`** and **MAVROS** in one Docker container. Gazebo is shown in your web browser; **QGroundControl** and the ArduPilot console run as windows on your desktop. It works the same on **Windows**, **macOS** and **Linux**.
 
 ---
 
 ## Quickstart
 
-You need **Docker** ([Docker Desktop](https://www.docker.com/products/docker-desktop/) on Windows/macOS, Docker Engine on Linux) and **Python 3**. Nothing else gets installed on your machine.
+You need **Docker** ([Docker Desktop](https://www.docker.com/products/docker-desktop/) on Windows/macOS, Docker Engine on Linux), **Python 3**, and [**QGroundControl**](https://docs.qgroundcontrol.com/master/en/qgc-user-guide/getting_started/download_and_install.html) (the normal installer for your OS).
 
 ```bash
 git clone https://github.com/jenbensen17/y_boat_sim.git
@@ -20,11 +20,11 @@ cd y_boat_sim
 python sim.py start
 ```
 
-The first start downloads and builds the image (several GB, once). After that it starts in about a minute and opens **http://localhost:6080** in your browser: a desktop with
+The first start downloads and builds the image (several GB, once). After that it starts in about a minute and opens:
 
-1. **Gazebo Sim** (left): the 3D boat on the water. Click and drag to look around.
-2. **QGroundControl** (top right): map, telemetry and the waypoint planner. Click **OK** on its two first-run popups; it remembers.
-3. **ArduPilot console** (bottom right): MAVProxy at a `MANUAL>` prompt.
+1. **Gazebo** in your browser at **http://localhost:6080**: the 3D boat on the water. Click and drag to look around.
+2. **QGroundControl** on your desktop: map, telemetry and the waypoint planner. It connects to the sim by itself (UDP 14550, its default).
+3. **ArduPilot console** in a new terminal window: MAVProxy at a `MANUAL>` prompt. Closing the window doesn't stop anything; `python sim.py console` reopens it.
 
 Check that ROS 2 can drive the boat:
 
@@ -42,13 +42,15 @@ Stop it with `python sim.py stop`.
 ## Commands
 
 ```bash
-python sim.py start               # start and open the browser desktop
-python sim.py start --no-gazebo   # no Gazebo window (lighter; physics still runs)
-python sim.py start --no-qgc      # no QGroundControl
+python sim.py start               # Gazebo in the browser, QGC + ArduPilot console on your desktop
+python sim.py start --no-gazebo   # no Gazebo (lighter; physics still runs)
+python sim.py start --no-qgc      # don't open QGroundControl
+python sim.py start --no-console  # don't open the ArduPilot console window
 python sim.py start --cpu         # skip the GPU even if one works
 python sim.py start --world sim/blueboat_waves.sdf   # full wave world (see Performance)
 python sim.py stop
 python sim.py status              # running? GPU or CPU rendering?
+python sim.py console             # ArduPilot console in this terminal (Ctrl+B, D to leave)
 python sim.py test                # ROS 2 drive test
 python sim.py logs                # follow the sim's output
 python sim.py shell               # bash inside the sim, with ROS 2 sourced
@@ -84,8 +86,9 @@ ROS 2 runs inside the container on domain **10** with the UDP-only DDS profile
 `sim/fastdds_udp.xml`. The simplest way to run your nodes against it is from
 `python sim.py shell`; the repo is mounted at `~/sim_scratch` inside the container.
 
-QGroundControl installed on your own machine can connect too: **Application Settings →
-Comm Links → Add → TCP**, server `localhost`, port `5762`.
+If QGroundControl doesn't pick the boat up by itself (UDP 14550 blocked, or Docker
+Engine inside WSL instead of Docker Desktop), connect it over TCP instead:
+**Application Settings → Comm Links → Add → TCP**, server `localhost`, port `5762`.
 
 ---
 
@@ -112,15 +115,15 @@ under 1% of the time.
 
 ```
 sim.py              The launcher.  ← the one you'll use
-compose.yaml        The container: sim + browser desktop on port 6080
+compose.yaml        The container: sim + Gazebo in the browser on port 6080
 compose.gpu-wsl.yaml  GPU add-on for Windows (sim.py adds it when the GPU works)
 docker/desktop.Dockerfile  Browser desktop layer on top of the sim image
 Dockerfile.sim      The base sim image (ROS 2, Gazebo, ArduPilot, MAVROS, QGC)
 test_ros.sh         The ROS 2 drive test (run via `python sim.py test`)
 
 sim/
-  desktop/start_desktop.sh  virtual display + noVNC, then the sim
-  launch_blueboat.sh        brings up Gazebo + SITL + bridge + MAVROS + QGC
+  desktop/start_desktop.sh  virtual display + noVNC for Gazebo, then the sim
+  launch_blueboat.sh        brings up Gazebo + SITL + bridge + MAVROS
   blueboat_waves_lite.sdf   the default world (boat + hydrodynamics)
   blueboat_waves.sdf        the full wave world
   blueboat.parm             ArduPilot parameters

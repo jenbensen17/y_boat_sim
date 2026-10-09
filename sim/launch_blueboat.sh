@@ -155,6 +155,14 @@ if [ "${HEADLESS}" = "1" ]; then
     ( cd "${HOME}/ardupilot" && unset DISPLAY && \
         sim_vehicle.py "${SITL_ARGS[@]}" --mavproxy-args="--daemon" ) &
     SITL_PID=$!
+elif [ "${SITL_CONSOLE:-xterm}" = "tmux" ]; then
+    # MAVProxy's console in a detached tmux session, so it can be shown in a terminal
+    # on the host (`python sim.py console` = docker exec -it ... tmux attach).
+    export SITL_RITW_TERMINAL="sh"
+    tmux new-session -d -s ardupilot -x 160 -y 45 \
+        "cd '${ARDUPILOT_DIR:-${HOME}/ardupilot}' && python3 Tools/autotest/sim_vehicle.py ${SITL_ARGS[*]}"
+    tmux set-option -t ardupilot history-limit 5000 >/dev/null
+    SITL_PID=""
 else
     # Launch ArduPilot SITL and MAVProxy inside a dedicated xterm window.
     # SITL_RITW_TERMINAL="sh" runs ardurover directly in the background so no extra
@@ -166,7 +174,7 @@ else
         "cd '${HOME}/ardupilot' && python3 '${HOME}/ardupilot/Tools/autotest/sim_vehicle.py' ${SITL_ARGS[*]}" &
     SITL_PID=$!
 fi
-echo "[launch] SITL started in xterm (pid ${SITL_PID})"
+echo "[launch] SITL started (console: ${SITL_CONSOLE:-xterm}${SITL_PID:+, pid ${SITL_PID}})"
 
 # --- ROS 2: bridge + MAVROS ----------------------------------------------
 if [ "${WITH_ROS}" = "1" ]; then

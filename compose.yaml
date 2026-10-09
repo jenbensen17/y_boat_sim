@@ -1,5 +1,5 @@
-# BlueBoat sim in one container, with Gazebo, QGroundControl and the ArduPilot console
-# on a desktop you open in your browser: http://localhost:6080
+# BlueBoat sim in one container. Gazebo is shown in your browser at
+# http://localhost:6080; QGroundControl and the ArduPilot console run on your machine.
 #
 # Use ./sim.py rather than calling this directly: it picks GPU or CPU rendering for
 # your machine (compose.gpu-wsl.yaml) and waits until the sim is ready.
@@ -20,9 +20,12 @@ services:
     init: true
     shm_size: 1gb
     ports:
-      - "6080:6080"        # browser desktop (noVNC)
-      - "5762:5762"        # MAVLink over TCP, for a QGroundControl installed on your machine
+      - "6080:6080"        # Gazebo in the browser (noVNC)
+      - "5762:5762"        # MAVLink over TCP (a fallback for ground stations)
       - "5763:5763"
+    extra_hosts:
+      # Docker Desktop defines this already; Linux needs it spelled out.
+      - "host.docker.internal:host-gateway"
     volumes:
       - ./:/home/simuser/sim_scratch
       # QGroundControl's settings survive restarts, so its first-run prompts only show once.
@@ -34,7 +37,13 @@ services:
       WORLD: ${WORLD:-/home/simuser/sim_scratch/sim/blueboat_waves_lite.sdf}
       HOME_LOCATION: ${HOME_LOCATION:-}
       GZ_GUI: ${GZ_GUI:-1}
-      QGC: ${QGC:-1}
+      # QGroundControl runs on your machine, not in here: MAVLink goes out to your
+      # machine's UDP 14550 (QGC's default, so it connects by itself); 14551 is MAVROS.
+      QGC: "0"
+      MAVLINK_OUTS: host.docker.internal:14550 127.0.0.1:14551
+      # The ArduPilot console runs in tmux so `python sim.py console` can show it in a
+      # terminal on your machine.
+      SITL_CONSOLE: tmux
       # Set by sim.py: "--render-engine-gui ogre" when rendering on the CPU.
       GZ_GUI_ARGS: ${GZ_GUI_ARGS:-}
     command: /home/simuser/sim_scratch/sim/desktop/start_desktop.sh
