@@ -1,0 +1,43 @@
+# BlueBoat sim in one container, with Gazebo, QGroundControl and the ArduPilot console
+# on a desktop you open in your browser: http://localhost:6080
+#
+# Use ./sim.py rather than calling this directly: it picks GPU or CPU rendering for
+# your machine (compose.gpu-wsl.yaml) and waits until the sim is ready.
+
+name: y_boat_sim
+
+services:
+  sim:
+    build:
+      context: docker
+      dockerfile: desktop.Dockerfile
+      args:
+        BASE_IMAGE: ${BASE_IMAGE:-jenbensen17/y_boat_sim:latest}
+    image: y_boat_sim_desktop:local
+    # The image is amd64-only for now; Apple Silicon runs it under emulation.
+    platform: linux/amd64
+    container_name: y_boat_sim
+    init: true
+    shm_size: 1gb
+    ports:
+      - "6080:6080"        # browser desktop (noVNC)
+      - "5762:5762"        # MAVLink over TCP, for a QGroundControl installed on your machine
+      - "5763:5763"
+    volumes:
+      - ./:/home/simuser/sim_scratch
+      # QGroundControl's settings survive restarts, so its first-run prompts only show once.
+      - qgc-config:/home/simuser/.config/QGroundControl
+    environment:
+      ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-10}
+      FASTRTPS_DEFAULT_PROFILES_FILE: /home/simuser/sim_scratch/sim/fastdds_udp.xml
+      RMW_FASTRTPS_USE_QOS_FROM_XML: "1"
+      WORLD: ${WORLD:-/home/simuser/sim_scratch/sim/blueboat_waves_lite.sdf}
+      HOME_LOCATION: ${HOME_LOCATION:-}
+      GZ_GUI: ${GZ_GUI:-1}
+      QGC: ${QGC:-1}
+      # Set by sim.py: "--render-engine-gui ogre" when rendering on the CPU.
+      GZ_GUI_ARGS: ${GZ_GUI_ARGS:-}
+    command: /home/simuser/sim_scratch/sim/desktop/start_desktop.sh
+
+volumes:
+  qgc-config:

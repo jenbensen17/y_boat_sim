@@ -8,7 +8,7 @@ No sensor bridges in this step.
 import os
 
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
+from launch.actions import DeclareLaunchArgument, ExecuteProcess
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
@@ -33,5 +33,12 @@ def generate_launch_description():
             # that publishes /clock, so making it wait on /clock would be circular.
             # Every *other* node in the graph should be launched with use_sim_time:=true.
             parameters=[{"config_file": config_file}],
+        ),
+        # /sim/clock_raw (every physics step) -> /clock at 50 Hz; see clock_throttle.py.
+        ExecuteProcess(
+            cmd=["python3", os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                         "clock_throttle.py")],
+            name="clock_throttle",
+            output="screen",
         ),
     ])

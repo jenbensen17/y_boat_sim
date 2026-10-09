@@ -1,0 +1,12 @@
+# GPU rendering through Windows' DirectX bridge (WSL2 / Docker Desktop on Windows).
+# sim.py adds this file only after checking that it works on your machine.
+services:
+  sim:
+    devices:
+      - /dev/dxg
+    volumes:
+      - /usr/lib/wsl:/usr/lib/wsl:ro
+    environment:
+      GALLIUM_DRIVER: d3d12
+      # Appended to the image's own path, which holds the wave plugin libraries.
+      LD_LIBRARY_PATH: /home/simuser/gz_ws/install/lib:/usr/lib/wsl/lib

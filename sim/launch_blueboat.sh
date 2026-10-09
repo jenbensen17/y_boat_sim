@@ -117,7 +117,10 @@ if [ "${GZ_SERVER_ONLY}" = "1" ]; then
     gz sim -v4 -r -s "${WORLD}" > /tmp/gz_blueboat.log 2>&1 &
 else
     echo "[launch] Starting Gazebo in full 3D GUI mode..."
-    gz sim -v4 -r "${WORLD}" > /tmp/gz_blueboat.log 2>&1 &
+    # GZ_GUI_ARGS lets the launcher pick a lighter GUI renderer without a GPU
+    # (--render-engine-gui ogre: ~1.6x the frame rate of ogre2 on the CPU).
+    # shellcheck disable=SC2086
+    gz sim -v4 -r ${GZ_GUI_ARGS:-} "${WORLD}" > /tmp/gz_blueboat.log 2>&1 &
 fi
 GZ_PID=$!
 echo "[launch] Gazebo started (pid ${GZ_PID}), log: /tmp/gz_blueboat.log"
