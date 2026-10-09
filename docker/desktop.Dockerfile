@@ -9,7 +9,7 @@ FROM ${BASE_IMAGE}
 
 USER root
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        xvfb x11vnc novnc websockify openbox x11-utils xdotool tmux \
+        xvfb x11vnc novnc websockify openbox x11-utils x11-apps xdotool tmux \
         ros-jazzy-foxglove-bridge \
     && rm -rf /var/lib/apt/lists/*
 USER simuser

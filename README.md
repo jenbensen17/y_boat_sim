@@ -77,8 +77,10 @@ water, 2 render threads). Gazebo then runs at ~18 FPS while the physics stays at
 time (measured on an 8-core laptop CPU). If the boat still lags on a slower machine,
 use `python sim.py start --no-gazebo` and follow it in QGroundControl.
 
-If a Windows machine falls back to the CPU, update the Windows GPU driver and run
-`wsl --update` in PowerShell, then try again.
+After starting on the GPU, `sim.py` checks that Gazebo's view actually draws. Some
+drivers accept GPU rendering but produce a black screen (seen on an AMD Radeon 880M);
+then it restarts in CPU mode by itself. If a Windows machine ends up on the CPU,
+update the Windows GPU driver and run `wsl --update` in PowerShell, then try again.
 
 ---
 

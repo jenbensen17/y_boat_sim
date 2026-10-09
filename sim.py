@@ -179,6 +179,40 @@ def gpu_works():
     return "D3D12" in out, out.strip().replace("renderer string: ", "")
 
 
+def gazebo_draws(timeout=60):
+    """Check Gazebo's 3D view isn't black. Some GPU drivers accept d3d12 but render
+    black frames (seen on an AMD Radeon 880M), which the driver-name probe can't catch.
+    Returns True/False, or None if it couldn't tell."""
+    check = ["docker", "exec", CONTAINER, "python3",
+             "/home/simuser/sim_scratch/sim/desktop/check_render.py"]
+    deadline = time.time() + timeout
+    result = None
+    while time.time() < deadline:
+        window = run(["docker", "exec", CONTAINER, "bash", "-c",
+                      "DISPLAY=:1 xdotool search --onlyvisible --name '^Gazebo.Sim'"],
+                     check=False, capture=True).stdout.strip()
+        if window:
+            time.sleep(8)  # let the scene load before judging it
+            for _ in range(3):
+                code = run(check, check=False, quiet=True).returncode
+                if code == 0:
+                    return True
+                result = False if code == 1 else None
+                time.sleep(4)
+            return result
+        time.sleep(2)
+    return None
+
+
+def open_browser(url):
+    if IS_WSL:
+        # Python's webbrowser picks a Linux opener inside WSL; use Windows' instead.
+        if subprocess.run(["powershell.exe", "-NoProfile", "-Command", f"Start-Process '{url}'"],
+                          stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0:
+            return
+    webbrowser.open(url)
+
+
 def wait_until_ready(timeout=180):
     say("Waiting for the sim to come up...")
     deadline = time.time() + timeout
@@ -226,8 +260,10 @@ def cmd_start(args):
         env["GZ_GUI_ARGS"] = "--render-engine-gui ogre"
         env["WATER_PLANE"] = "1"
         env["CPU_RENDER_THREADS"] = "2"
-        say("Rendering on the CPU (no usable GPU in containers on this machine), with "
-            "simpler graphics to keep it smooth.")
+        reason = ("GPU output was black" if getattr(args, "gpu_fallback", False)
+                  else "as requested" if args.cpu
+                  else "no usable GPU in containers on this machine")
+        say(f"Rendering on the CPU ({reason}), with simpler graphics to keep it smooth.")
     if args.no_gazebo:
         env["GZ_GUI"] = "0"
     if args.world:
@@ -242,6 +278,12 @@ def cmd_start(args):
         f.write(" ".join(files))
 
     wait_until_ready()
+    if gpu and not args.no_gazebo and gazebo_draws() is False:
+        say("Gazebo's view came out black on this GPU driver; restarting with CPU "
+            "rendering. (Updating the Windows GPU driver may fix the GPU path.)")
+        args.cpu = True
+        args.gpu_fallback = True
+        return cmd_start(args)
     say("Ready.")
     if not args.no_qgc:
         launch_qgc()
@@ -250,7 +292,7 @@ def cmd_start(args):
     if not args.no_gazebo:
         say(f"Gazebo: {DESKTOP_URL}")
         if not args.no_browser:
-            webbrowser.open(DESKTOP_URL)
+            open_browser(DESKTOP_URL)
     say("ArduPilot console: python sim.py console    Drive test: python sim.py test    "
         "Stop: python sim.py stop")
 
