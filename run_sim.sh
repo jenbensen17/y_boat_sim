@@ -197,7 +197,7 @@ elif [ "${IS_WSL}" = "1" ] && [ -e "/dev/dxg" ]; then
     # puts the gz_ws libs (e.g. libgz-waves1) there, and clobbering it breaks the
     # waves plugins.
     IMAGE_LD_PATH="$(docker image inspect "${IMAGE}" --format '{{range .Config.Env}}{{println .}}{{end}}' 2>/dev/null \
-                     | sed -n 's/^LD_LIBRARY_PATH=//p' | sed 's/:*$//')"
+                     | sed -n 's/^LD_LIBRARY_PATH=//p' | sed 's/:*$//')" || true
     D3D12_ARGS=(--device "/dev/dxg" -v "/usr/lib/wsl:/usr/lib/wsl:ro"
                 -e LD_LIBRARY_PATH="${IMAGE_LD_PATH:+${IMAGE_LD_PATH}:}/usr/lib/wsl/lib" -e GALLIUM_DRIVER=d3d12)
 
