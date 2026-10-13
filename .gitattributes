@@ -7,3 +7,11 @@
 *.yaml text eol=lf
 *.md text eol=lf
 Dockerfile* text eol=lf
+
+# Binary assets: never convert line endings (it corrupts meshes and images).
+*.stl binary
+*.dae binary
+*.glb binary
+*.png binary
+*.jpg binary
+*.dds binary

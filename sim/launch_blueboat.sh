@@ -41,6 +41,9 @@ set +u
 source /opt/ros/jazzy/setup.bash
 set -u
 
+# Models that live in this repo (e.g. blueboat_lite) come first.
+export GZ_SIM_RESOURCE_PATH="${SCRIPT_DIR}/models${GZ_SIM_RESOURCE_PATH:+:${GZ_SIM_RESOURCE_PATH}}"
+
 GZ_PID=""
 SITL_PID=""
 BRIDGE_PID=""
@@ -98,6 +101,28 @@ else
     done
 fi
 
+# CPU rendering: cap Mesa's llvmpipe threads (its default, one per core, made the
+# physics fall behind real time ~35% of the time; 2 threads keeps it at ~1.0x).
+if [ -n "${CPU_RENDER_THREADS:-}" ]; then
+    export LP_NUM_THREADS="${CPU_RENDER_THREADS}"
+fi
+
+# WATER_PLANE=1 (CPU rendering): draw the water as a flat plane instead of the
+# 256x256 wave mesh. On the CPU renderer it looks the same and roughly doubles
+# Gazebo's frame rate; on a GPU the mesh looks better, so it stays the default.
+if [ "${WATER_PLANE:-0}" = "1" ]; then
+    PLANE_WORLD="/tmp/$(basename "${WORLD%.sdf}")_plane.sdf"
+    python3 - "${WORLD}" "${PLANE_WORLD}" <<'PY'
+import re, sys
+src, dst = sys.argv[1], sys.argv[2]
+sdf = open(src).read()
+sdf = re.sub(r"<mesh>\s*<uri>model://waves/materials/mesh_L256m_N256\.dae</uri>\s*</mesh>",
+             "<plane><normal>0 0 1</normal><size>500 500</size></plane>", sdf)
+open(dst, "w").write(sdf)
+PY
+    WORLD="${PLANE_WORLD}"
+fi
+
 echo "[launch] world:    ${WORLD}"
 echo "[launch] params:   ${PARAM_FILE}"
 echo "[launch] home:     ${HOME_LOCATION}"
@@ -117,7 +142,10 @@ if [ "${GZ_SERVER_ONLY}" = "1" ]; then
     gz sim -v4 -r -s "${WORLD}" > /tmp/gz_blueboat.log 2>&1 &
 else
     echo "[launch] Starting Gazebo in full 3D GUI mode..."
-    gz sim -v4 -r "${WORLD}" > /tmp/gz_blueboat.log 2>&1 &
+    # GZ_GUI_ARGS lets the launcher pick a lighter GUI renderer without a GPU
+    # (--render-engine-gui ogre: ~1.6x the frame rate of ogre2 on the CPU).
+    # shellcheck disable=SC2086
+    gz sim -v4 -r ${GZ_GUI_ARGS:-} "${WORLD}" > /tmp/gz_blueboat.log 2>&1 &
 fi
 GZ_PID=$!
 echo "[launch] Gazebo started (pid ${GZ_PID}), log: /tmp/gz_blueboat.log"
@@ -152,6 +180,14 @@ if [ "${HEADLESS}" = "1" ]; then
     ( cd "${HOME}/ardupilot" && unset DISPLAY && \
         sim_vehicle.py "${SITL_ARGS[@]}" --mavproxy-args="--daemon" ) &
     SITL_PID=$!
+elif [ "${SITL_CONSOLE:-xterm}" = "tmux" ]; then
+    # MAVProxy's console in a detached tmux session, so it can be shown in a terminal
+    # on the host (`python sim.py console` = docker exec -it ... tmux attach).
+    export SITL_RITW_TERMINAL="sh"
+    tmux new-session -d -s ardupilot -x 160 -y 45 \
+        "cd '${ARDUPILOT_DIR:-${HOME}/ardupilot}' && python3 Tools/autotest/sim_vehicle.py ${SITL_ARGS[*]}"
+    tmux set-option -t ardupilot history-limit 5000 >/dev/null
+    SITL_PID=""
 else
     # Launch ArduPilot SITL and MAVProxy inside a dedicated xterm window.
     # SITL_RITW_TERMINAL="sh" runs ardurover directly in the background so no extra
@@ -163,7 +199,7 @@ else
         "cd '${HOME}/ardupilot' && python3 '${HOME}/ardupilot/Tools/autotest/sim_vehicle.py' ${SITL_ARGS[*]}" &
     SITL_PID=$!
 fi
-echo "[launch] SITL started in xterm (pid ${SITL_PID})"
+echo "[launch] SITL started (console: ${SITL_CONSOLE:-xterm}${SITL_PID:+, pid ${SITL_PID}})"
 
 # --- ROS 2: bridge + MAVROS ----------------------------------------------
 if [ "${WITH_ROS}" = "1" ]; then

@@ -5,9 +5,10 @@
 # Both entries are GZ_TO_ROS only. Nothing in ROS should be driving Gazebo directly --
 # the boat is commanded through ArduPilot/MAVROS, not by writing to Gazebo topics.
 
-# Simulation clock. Everything else in the ROS graph should run with use_sim_time:=true
-# and take its time from here.
-- ros_topic_name: "/clock"
+# Simulation clock, at every physics step. Not consumed directly: launch/clock_throttle.py
+# republishes it on /clock at 50 Hz (the full rate cost MAVROS ~1.8 cores). Everything
+# else in the ROS graph should run with use_sim_time:=true and take its time from /clock.
+- ros_topic_name: "/sim/clock_raw"
   gz_topic_name: "/clock"
   ros_type_name: "rosgraph_msgs/msg/Clock"
   gz_type_name: "gz.msgs.Clock"

@@ -18,6 +18,14 @@
 -->
 <sdf version="1.6">
   <world name="waves">
+    <!-- 4 ms (250 Hz) instead of Gazebo's 1 ms default. With ArduPilot lock_step every
+         physics step waits on a SITL round trip, so 1 kHz meant 1000 chances per second
+         to stall (RTF dips to ~0.3 on WSL/Docker) and ~1.5 cores for one boat. 250 Hz
+         is still far above Rover's loop rate; 4 ms: ~0.55 cores, dips ~4x rarer. -->
+    <physics name="4ms" type="ignored">
+      <max_step_size>0.004</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
     <plugin filename="gz-sim-physics-system"
             name="gz::sim::systems::Physics">
     </plugin>
