@@ -1,0 +1,268 @@
+<?xml version="1.0"?>
+<sdf version="1.9">
+  <model name="roboboat_vessel_black">
+    <link name="link">
+      <inertial>
+        <pose>0 0 0.02 0 0 0</pose>
+        <mass>4</mass>
+        <inertia>
+          <ixx>0.15</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.8</iyy>
+          <iyz>0</iyz>
+          <izz>0.9</izz>
+        </inertia>
+      </inertial>
+      <collision name="hull_collision">
+        <pose>0 0 0.0698 0 0 0</pose>
+        <geometry>
+          <box><size>1.0668 0.4064 0.1397</size></box>
+        </geometry>
+      </collision>
+      <collision name="sign_collision">
+        <pose>0.1906 0 0.316 0 0 0</pose>
+        <geometry>
+          <box><size>0.5795 0.02 0.3151</size></box>
+        </geometry>
+      </collision>
+      <visual name="hull">
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_vessel_yellow/meshes/hull.obj</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <ambient>0.0513 0.0513 0.0513 1</ambient>
+          <diffuse>0.0513 0.0513 0.0513 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <visual name="sign">
+        <pose>0.1906 0 0.316 0 0 0</pose>
+        <geometry>
+          <box><size>0.5795 0.006 0.3151</size></box>
+        </geometry>
+        <material>
+          <ambient>0.8276 0.8276 0.8276 1</ambient>
+          <diffuse>0.8276 0.8276 0.8276 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <visual name="symbol_h_0">
+        <pose>0.1906 0.004 0.316 0 0 0</pose>
+        <geometry>
+          <box><size>0.2093 0.002 0.0507</size></box>
+        </geometry>
+        <material>
+          <ambient>0.0044 0.0044 0.0044 1</ambient>
+          <diffuse>0.0044 0.0044 0.0044 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <visual name="symbol_v_0">
+        <pose>0.1906 0.004 0.316 0 0 0</pose>
+        <geometry>
+          <box><size>0.0507 0.002 0.2093</size></box>
+        </geometry>
+        <material>
+          <ambient>0.0044 0.0044 0.0044 1</ambient>
+          <diffuse>0.0044 0.0044 0.0044 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <visual name="symbol_h_1">
+        <pose>0.1906 -0.004 0.316 0 0 0</pose>
+        <geometry>
+          <box><size>0.2093 0.002 0.0507</size></box>
+        </geometry>
+        <material>
+          <ambient>0.0044 0.0044 0.0044 1</ambient>
+          <diffuse>0.0044 0.0044 0.0044 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <visual name="symbol_v_1">
+        <pose>0.1906 -0.004 0.316 0 0 0</pose>
+        <geometry>
+          <box><size>0.0507 0.002 0.2093</size></box>
+        </geometry>
+        <material>
+          <ambient>0.0044 0.0044 0.0044 1</ambient>
+          <diffuse>0.0044 0.0044 0.0044 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <visual name="upright_0">
+        <pose>-0.1158 0 0.2368 0 0 0</pose>
+        <geometry>
+          <cylinder><radius>0.0167</radius><length>0.4735</length></cylinder>
+        </geometry>
+        <material>
+          <ambient>0.8276 0.8276 0.8276 1</ambient>
+          <diffuse>0.8276 0.8276 0.8276 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <visual name="crossbar_0">
+        <pose>-0.1158 0 0.1564 1.5708 0 0</pose>
+        <geometry>
+          <cylinder><radius>0.0167</radius><length>0.5309</length></cylinder>
+        </geometry>
+        <material>
+          <ambient>0.8276 0.8276 0.8276 1</ambient>
+          <diffuse>0.8276 0.8276 0.8276 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <visual name="riser_0_0">
+        <pose>-0.1158 -0.2654 0.1093 0 0 0</pose>
+        <geometry>
+          <cylinder><radius>0.0167</radius><length>0.0942</length></cylinder>
+        </geometry>
+        <material>
+          <ambient>0.8276 0.8276 0.8276 1</ambient>
+          <diffuse>0.8276 0.8276 0.8276 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <visual name="riser_0_1">
+        <pose>-0.1158 0.2654 0.1093 0 0 0</pose>
+        <geometry>
+          <cylinder><radius>0.0167</radius><length>0.0942</length></cylinder>
+        </geometry>
+        <material>
+          <ambient>0.8276 0.8276 0.8276 1</ambient>
+          <diffuse>0.8276 0.8276 0.8276 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <visual name="upright_1">
+        <pose>0.4971 0 0.2368 0 0 0</pose>
+        <geometry>
+          <cylinder><radius>0.0167</radius><length>0.4735</length></cylinder>
+        </geometry>
+        <material>
+          <ambient>0.8276 0.8276 0.8276 1</ambient>
+          <diffuse>0.8276 0.8276 0.8276 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <visual name="crossbar_1">
+        <pose>0.4971 0 0.1564 1.5708 0 0</pose>
+        <geometry>
+          <cylinder><radius>0.0167</radius><length>0.5309</length></cylinder>
+        </geometry>
+        <material>
+          <ambient>0.8276 0.8276 0.8276 1</ambient>
+          <diffuse>0.8276 0.8276 0.8276 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <visual name="riser_1_0">
+        <pose>0.4971 -0.2654 0.1093 0 0 0</pose>
+        <geometry>
+          <cylinder><radius>0.0167</radius><length>0.0942</length></cylinder>
+        </geometry>
+        <material>
+          <ambient>0.8276 0.8276 0.8276 1</ambient>
+          <diffuse>0.8276 0.8276 0.8276 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <visual name="riser_1_1">
+        <pose>0.4971 0.2654 0.1093 0 0 0</pose>
+        <geometry>
+          <cylinder><radius>0.0167</radius><length>0.0942</length></cylinder>
+        </geometry>
+        <material>
+          <ambient>0.8276 0.8276 0.8276 1</ambient>
+          <diffuse>0.8276 0.8276 0.8276 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <visual name="noodle_0">
+        <pose>0.1906 -0.2654 0.0622 0 1.5708 0</pose>
+        <geometry>
+          <cylinder><radius>0.0622</radius><length>0.5588</length></cylinder>
+        </geometry>
+        <material>
+          <ambient>0 0.1619 0.5272 1</ambient>
+          <diffuse>0 0.1619 0.5272 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <visual name="noodle_pipe_0">
+        <pose>0.1906 -0.2654 0.0622 0 1.5708 0</pose>
+        <geometry>
+          <cylinder><radius>0.0167</radius><length>0.6129</length></cylinder>
+        </geometry>
+        <material>
+          <ambient>0.8276 0.8276 0.8276 1</ambient>
+          <diffuse>0.8276 0.8276 0.8276 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <visual name="noodle_1">
+        <pose>0.1906 0.2654 0.0622 0 1.5708 0</pose>
+        <geometry>
+          <cylinder><radius>0.0622</radius><length>0.5588</length></cylinder>
+        </geometry>
+        <material>
+          <ambient>0 0.1619 0.5272 1</ambient>
+          <diffuse>0 0.1619 0.5272 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <visual name="noodle_pipe_1">
+        <pose>0.1906 0.2654 0.0622 0 1.5708 0</pose>
+        <geometry>
+          <cylinder><radius>0.0167</radius><length>0.6129</length></cylinder>
+        </geometry>
+        <material>
+          <ambient>0.8276 0.8276 0.8276 1</ambient>
+          <diffuse>0.8276 0.8276 0.8276 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+    </link>
+    <joint name="mooring" type="prismatic">
+      <parent>world</parent>
+      <child>link</child>
+      <axis>
+        <xyz>0 0 1</xyz>
+      </axis>
+    </joint>
+    <plugin name="vrx::PolyhedraBuoyancyDrag" filename="libPolyhedraBuoyancyDrag.so">
+      <linear_drag>25</linear_drag>
+      <angular_drag>2</angular_drag>
+      <buoyancy name="hull">
+        <link_name>link</link_name>
+        <pose>0 0 0.0698 0 0 0</pose>
+        <geometry>
+          <box><size>1.0668 0.4064 0.1397</size></box>
+        </geometry>
+      </buoyancy>
+      <buoyancy name="noodle_0">
+        <link_name>link</link_name>
+        <pose>0.1906 -0.2654 0.0622 0 1.5708 0</pose>
+        <geometry>
+          <cylinder><radius>0.0622</radius><length>0.5588</length></cylinder>
+        </geometry>
+      </buoyancy>
+      <buoyancy name="noodle_1">
+        <link_name>link</link_name>
+        <pose>0.1906 0.2654 0.0622 0 1.5708 0</pose>
+        <geometry>
+          <cylinder><radius>0.0622</radius><length>0.5588</length></cylinder>
+        </geometry>
+      </buoyancy>
+      <wavefield>
+        <topic>/vrx/wavefield/parameters</topic>
+      </wavefield>
+    </plugin>
+    <plugin filename="gz-sim-label-system" name="gz::sim::systems::Label">
+      <label>60</label>
+    </plugin>
+  </model>
+</sdf>

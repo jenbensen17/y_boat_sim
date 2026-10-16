@@ -1,0 +1,1146 @@
+<?xml version="1.0"?>
+<sdf version="1.9">
+  <model name="roboboat_dock_s">
+    <static>true</static>
+    <link name="link">
+      <collision name="pier_collision">
+        <pose>0 0 0.127 0 0 0</pose>
+        <geometry>
+          <box><size>8.636 1.016 0.4064</size></box>
+        </geometry>
+      </collision>
+      <collision name="tine_0_collision">
+        <pose>-3.556 1.524 0.127 0 0 0</pose>
+        <geometry>
+          <box><size>0.508 2.032 0.4064</size></box>
+        </geometry>
+      </collision>
+      <collision name="tine_1_collision">
+        <pose>-1.524 1.524 0.127 0 0 0</pose>
+        <geometry>
+          <box><size>0.508 2.032 0.4064</size></box>
+        </geometry>
+      </collision>
+      <collision name="tine_2_collision">
+        <pose>0.508 1.524 0.127 0 0 0</pose>
+        <geometry>
+          <box><size>0.508 2.032 0.4064</size></box>
+        </geometry>
+      </collision>
+      <collision name="tine_3_collision">
+        <pose>2.54 1.524 0.127 0 0 0</pose>
+        <geometry>
+          <box><size>0.508 2.032 0.4064</size></box>
+        </geometry>
+      </collision>
+      <visual name="cube_0">
+        <pose>-4.064 -0.254 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_1">
+        <pose>-4.064 0.254 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_2">
+        <pose>-3.556 -0.254 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_3">
+        <pose>-3.556 0.254 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_4">
+        <pose>-3.048 -0.254 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_5">
+        <pose>-3.048 0.254 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_6">
+        <pose>-2.54 -0.254 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_7">
+        <pose>-2.54 0.254 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_8">
+        <pose>-2.032 -0.254 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_9">
+        <pose>-2.032 0.254 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_10">
+        <pose>-1.524 -0.254 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_11">
+        <pose>-1.524 0.254 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_12">
+        <pose>-1.016 -0.254 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_13">
+        <pose>-1.016 0.254 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_14">
+        <pose>-0.508 -0.254 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_15">
+        <pose>-0.508 0.254 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_16">
+        <pose>0 -0.254 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_17">
+        <pose>0 0.254 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_18">
+        <pose>0.508 -0.254 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_19">
+        <pose>0.508 0.254 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_20">
+        <pose>1.016 -0.254 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_21">
+        <pose>1.016 0.254 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_22">
+        <pose>1.524 -0.254 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_23">
+        <pose>1.524 0.254 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_24">
+        <pose>2.032 -0.254 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_25">
+        <pose>2.032 0.254 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_26">
+        <pose>2.54 -0.254 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_27">
+        <pose>2.54 0.254 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_28">
+        <pose>3.048 -0.254 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_29">
+        <pose>3.048 0.254 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_30">
+        <pose>3.556 -0.254 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_31">
+        <pose>3.556 0.254 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_32">
+        <pose>4.064 -0.254 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_33">
+        <pose>4.064 0.254 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_34">
+        <pose>-3.556 0.762 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_35">
+        <pose>-3.556 1.27 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_36">
+        <pose>-3.556 1.778 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_37">
+        <pose>-3.556 2.286 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_38">
+        <pose>-1.524 0.762 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_39">
+        <pose>-1.524 1.27 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_40">
+        <pose>-1.524 1.778 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_41">
+        <pose>-1.524 2.286 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_42">
+        <pose>0.508 0.762 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_43">
+        <pose>0.508 1.27 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_44">
+        <pose>0.508 1.778 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_45">
+        <pose>0.508 2.286 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_46">
+        <pose>2.54 0.762 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_47">
+        <pose>2.54 1.27 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_48">
+        <pose>2.54 1.778 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="cube_49">
+        <pose>2.54 2.286 0.3302 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://roboboat_dock_s/meshes/dock_cube.dae</uri>
+            <scale>1.016 1.016 1.0015</scale>
+          </mesh>
+        </geometry>
+            <material>
+              <diffuse>1.0 1.0 1.0</diffuse>
+              <specular>1.0 1.0 1.0</specular>
+              <pbr>
+                <metal>
+                  <albedo_map>model://dock_block_4x4/mesh/DockCubes_Albedo.png</albedo_map>
+                  <normal_map>model://dock_block_4x4/mesh/DockCubes_Normal.png</normal_map>
+                  <roughness_map>model://dock_block_4x4/mesh/DockCubes_Roughness.png</roughness_map>
+                  <metalness_map>model://dock_block_4x4/mesh/DockCubes_Metalness.png</metalness_map>
+                </metal>
+              </pbr>
+            </material>
+      </visual>
+      <visual name="pier_walls">
+        <pose>0 0 0.1202 0 0 0</pose>
+        <geometry>
+          <box><size>8.606 0.986 0.34</size></box>
+        </geometry>
+        <material>
+          <ambient>0.3609 0.3232 0.2836 1</ambient>
+          <diffuse>0.3609 0.3232 0.2836 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <visual name="tine_0_walls">
+        <pose>-3.556 1.524 0.1202 0 0 0</pose>
+        <geometry>
+          <box><size>0.478 2.002 0.34</size></box>
+        </geometry>
+        <material>
+          <ambient>0.3609 0.3232 0.2836 1</ambient>
+          <diffuse>0.3609 0.3232 0.2836 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <visual name="tine_1_walls">
+        <pose>-1.524 1.524 0.1202 0 0 0</pose>
+        <geometry>
+          <box><size>0.478 2.002 0.34</size></box>
+        </geometry>
+        <material>
+          <ambient>0.3609 0.3232 0.2836 1</ambient>
+          <diffuse>0.3609 0.3232 0.2836 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <visual name="tine_2_walls">
+        <pose>0.508 1.524 0.1202 0 0 0</pose>
+        <geometry>
+          <box><size>0.478 2.002 0.34</size></box>
+        </geometry>
+        <material>
+          <ambient>0.3609 0.3232 0.2836 1</ambient>
+          <diffuse>0.3609 0.3232 0.2836 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <visual name="tine_3_walls">
+        <pose>2.54 1.524 0.1202 0 0 0</pose>
+        <geometry>
+          <box><size>0.478 2.002 0.34</size></box>
+        </geometry>
+        <material>
+          <ambient>0.3609 0.3232 0.2836 1</ambient>
+          <diffuse>0.3609 0.3232 0.2836 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+    </link>
+    <plugin filename="gz-sim-label-system" name="gz::sim::systems::Label">
+      <label>50</label>
+    </plugin>
+  </model>
+</sdf>

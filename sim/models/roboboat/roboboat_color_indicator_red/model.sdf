@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+<sdf version="1.9">
+  <model name="roboboat_color_indicator_red">
+    <static>true</static>
+    <link name="link">
+      <collision name="collision">
+        <pose>0 0 0.0658 0 0 0</pose>
+        <geometry>
+          <cylinder><radius>0.064</radius><length>0.1315</length></cylinder>
+        </geometry>
+      </collision>
+      <visual name="base">
+        <pose>0 0 0.0059 0 0 0</pose>
+        <geometry>
+          <cylinder><radius>0.064</radius><length>0.0118</length></cylinder>
+        </geometry>
+        <material>
+          <ambient>0.6793 0.6793 0.6866 1</ambient>
+          <diffuse>0.6793 0.6793 0.6866 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <visual name="indicator">
+        <pose>0 0 0.0683 0 0 0</pose>
+        <geometry>
+          <cylinder><radius>0.0604</radius><length>0.113</length></cylinder>
+        </geometry>
+        <material>
+          <ambient>0.2419 0.0075 0.003 1</ambient>
+          <diffuse>0.2419 0.0075 0.003 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <visual name="lid">
+        <pose>0 0 0.1282 0 0 0</pose>
+        <geometry>
+          <cylinder><radius>0.064</radius><length>0.0068</length></cylinder>
+        </geometry>
+        <material>
+          <ambient>0.6793 0.6793 0.6866 1</ambient>
+          <diffuse>0.6793 0.6793 0.6866 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <visual name="antenna_base">
+        <pose>0.0277 0 0.1344 0 0 0</pose>
+        <geometry>
+          <cylinder><radius>0.0038</radius><length>0.0057</length></cylinder>
+        </geometry>
+        <material>
+          <ambient>0.4339 0.2379 0.013 1</ambient>
+          <diffuse>0.4339 0.2379 0.013 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <visual name="antenna">
+        <pose>0.0277 0 0.1607 0 0 0</pose>
+        <geometry>
+          <cylinder><radius>0.0038</radius><length>0.0467</length></cylinder>
+        </geometry>
+        <material>
+          <ambient>0.0272 0.0272 0.0253 1</ambient>
+          <diffuse>0.0272 0.0272 0.0253 1</diffuse>
+          <specular>0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+    </link>
+    <plugin filename="gz-sim-label-system" name="gz::sim::systems::Label">
+      <label>40</label>
+    </plugin>
+  </model>
+</sdf>
