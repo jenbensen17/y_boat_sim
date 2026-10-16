@@ -1,0 +1,87 @@
+<?xml version="1.0"?>
+<sdf version="1.9">
+  <model name="roboboat_surmark_950410_red">
+    <link name="link">
+      <inertial>
+        <pose>0 0 -0.2648 0 0 0</pose>
+        <mass>34.8721</mass>
+        <inertia>
+          <ixx>4.73679</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>4.73679</iyy>
+          <iyz>0</iyz>
+          <izz>0.392311</izz>
+        </inertia>
+      </inertial>
+      <collision name="skirt_collision">
+        <pose>0 0 -0.1899 0 0 0</pose>
+        <geometry>
+          <cylinder><radius>0.175</radius><length>0.1498</length></cylinder>
+        </geometry>
+      </collision>
+      <collision name="ring_collision">
+        <pose>0 0 -0.025 0 0 0</pose>
+        <geometry>
+          <cylinder><radius>0.25</radius><length>0.18</length></cylinder>
+        </geometry>
+      </collision>
+      <collision name="column_collision">
+        <pose>0 0 0.5251 0 0 0</pose>
+        <geometry>
+          <cylinder><radius>0.136</radius><length>0.9202</length></cylinder>
+        </geometry>
+      </collision>
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>https://fuel.gazebosim.org/1.0/ngxingyu/models/surmark950410/tip/files/meshes/surmark950410.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <ambient>0.7921 0.0039 0.0274 1</ambient>
+          <diffuse>0.7921 0.0039 0.0274 1</diffuse>
+          <specular>0.7921 0.0039 0.0274 1</specular>
+        </material>
+      </visual>
+    </link>
+    <joint name="mooring" type="prismatic">
+      <parent>world</parent>
+      <child>link</child>
+      <axis>
+        <xyz>0 0 1</xyz>
+      </axis>
+    </joint>
+    <plugin name="vrx::PolyhedraBuoyancyDrag" filename="libPolyhedraBuoyancyDrag.so">
+      <linear_drag>25</linear_drag>
+      <angular_drag>2</angular_drag>
+      <buoyancy name="skirt">
+        <link_name>link</link_name>
+        <pose>0 0 -0.1899 0 0 0</pose>
+        <geometry>
+          <cylinder><radius>0.175</radius><length>0.1498</length></cylinder>
+        </geometry>
+      </buoyancy>
+      <buoyancy name="ring">
+        <link_name>link</link_name>
+        <pose>0 0 -0.025 0 0 0</pose>
+        <geometry>
+          <cylinder><radius>0.25</radius><length>0.18</length></cylinder>
+        </geometry>
+      </buoyancy>
+      <buoyancy name="column">
+        <link_name>link</link_name>
+        <pose>0 0 0.5251 0 0 0</pose>
+        <geometry>
+          <cylinder><radius>0.136</radius><length>0.9202</length></cylinder>
+        </geometry>
+      </buoyancy>
+      <wavefield>
+        <topic>/vrx/wavefield/parameters</topic>
+      </wavefield>
+    </plugin>
+    <plugin filename="gz-sim-label-system" name="gz::sim::systems::Label">
+      <label>10</label>
+    </plugin>
+  </model>
+</sdf>
