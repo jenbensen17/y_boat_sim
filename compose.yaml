@@ -1,3 +1,60 @@
 services:
+  # The simulator: Gazebo, the RoboBoat course, the BlueBoat, ArduPilot SITL,
+  # MAVROS and the two viewer servers
   sim:
+    # Pulled from GitHub if it's there, built from this folder if not
+    image: ghcr.io/jenbensen17/y_boat_sim:latest
     build: .
+    init: true
+    # Same network, shared memory and ROS domain as y_boat_core's dev container,
+    # so ROS topics flow between the two
+    network_mode: host
+    ipc: host
+    environment:
+      - ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-10}
+    extra_hosts:
+      # Docker Desktop defines this already; Docker Engine on Linux needs it spelled out
+      - "host.docker.internal:host-gateway"
+
+  # Makes the viewers reachable from your browser: the sim viewer on
+  # localhost:8080 (its world stream on 9090) and Foxglove on localhost:8765.
+  # Docker Desktop (Windows, Mac) keeps host-network ports inside its VM, so this
+  # forwards them out.
+  ports:
+    image: alpine/socat:1.8.0.3
+    init: true
+    ports:
+      - "8080:8080"
+      - "8765:8765"
+      - "9090:9090"
+    # The sim's ports live on this network's gateway
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        gw=$$(ip route | awk '/default/ {print $$3}')
+        socat TCP-LISTEN:8080,fork,reuseaddr TCP:$$gw:18080 &
+        socat TCP-LISTEN:8765,fork,reuseaddr TCP:$$gw:18765 &
+        exec socat TCP-LISTEN:9090,fork,reuseaddr TCP:$$gw:19090
+
+  # The ArduPilot terminal (MAVProxy). Open it with:  docker compose run --rm console
+  console:
+    image: ghcr.io/jenbensen17/y_boat_sim:latest
+    profiles: ["console"]
+    network_mode: host
+    stdin_open: true
+    tty: true
+    command: ["mavproxy.py", "--master", "tcp:127.0.0.1:5762", "--state-basedir", "/tmp/mavproxy"]
+
+  # The Gazebo window, for machines that can show it (Linux, or Windows with WSL).
+  # Open it with:  docker compose --profile gui up -d gui
+  gui:
+    image: ghcr.io/jenbensen17/y_boat_sim:latest
+    profiles: ["gui"]
+    network_mode: host
+    ipc: host
+    # Draws through your X server (WSLg on Windows). On Linux, run `xhost +local:` first
+    environment:
+      - DISPLAY=${DISPLAY:-:0}
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    command: ["gz", "sim", "-g"]

@@ -1,0 +1,7 @@
+# Settings for the boat named yboat1gz (the name coug_gazebo's BlueBoat uses).
+/yboat1gz:
+  coug_gazebo_agent_launch:
+    ros__parameters:
+      urdf_file: "blueboat.gazebo.xacro"
+      ardupilot_param_file: "blueboat.param"
+      ardupilot_instance: 0

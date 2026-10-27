@@ -1,0 +1,4 @@
+# Kept out of the Docker build: rebuilt inside it
+web/node_modules/
+web/dist/
+.git/

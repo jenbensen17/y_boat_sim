@@ -1,0 +1,5 @@
+# The RoboBoat course scenario: which world to load.
+/**:
+  coug_gazebo_world_launch:
+    ros__parameters:
+      world_file: "roboboat.sdf.xacro"

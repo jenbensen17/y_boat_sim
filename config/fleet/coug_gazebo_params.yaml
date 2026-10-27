@@ -1,0 +1,20 @@
+# Settings shared by every boat. coug_gazebo's launch files read this file
+# from $CONFIG_DIR/fleet/.
+/**:
+  coug_gazebo_world_launch:
+    ros__parameters:
+      world_file: "roboboat.sdf.xacro"
+
+  coug_gazebo_agent_launch:
+    ros__parameters:
+      urdf_file: "blueboat.gazebo.xacro"
+      ardupilot_param_file: "blueboat.param"
+      # ArduPilot instance N listens on TCP 5760 + 10N and talks to Gazebo on UDP 9002 + 10N
+      ardupilot_instance: 0
+
+  navsat_covariance_node:
+    ros__parameters:
+      # u-blox ZED-F9P datasheet values, as in coug_gazebo
+      position_noise_sigmas: [0.015, 0.015, 0.025] # [east, north, up] [m]
+      input_topic: "gps/fix_gz"
+      output_topic: "gps/fix"

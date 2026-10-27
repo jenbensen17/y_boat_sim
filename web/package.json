@@ -1,0 +1,15 @@
+{
+  "name": "y_boat_sim_viewer",
+  "private": true,
+  "description": "The sim's browser viewer: gzweb bundled into one file",
+  "scripts": {
+    "build": "esbuild main.js --bundle --minify --format=esm --outfile=dist/viewer.js && cp index.html dist/"
+  },
+  "dependencies": {
+    "gzweb": "3.0.2",
+    "@babel/runtime": "8.0.7"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2"
+  }
+}

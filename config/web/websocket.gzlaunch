@@ -1,0 +1,10 @@
+<?xml version='1.0'?>
+<!-- Streams the running world to the browser viewer (web/).
+     Port 19090 inside the sim; the ports service publishes it as 9090. -->
+<gz version='1.0'>
+  <plugin name="gz::launch::WebsocketServer" filename="gz-launch-websocket-server">
+    <port>19090</port>
+    <publication_hz>30</publication_hz>
+    <max_connections>-1</max_connections>
+  </plugin>
+</gz>

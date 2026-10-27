@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RoboBoat Sim</title>
+  <style>
+    html, body { margin: 0; height: 100%; background: #1d2430; color: #e8ecf2;
+                 font: 14px system-ui, sans-serif; overflow: hidden; }
+    #gz-scene { position: absolute; inset: 0; }
+    #bar { position: absolute; top: 12px; left: 12px; right: 12px; display: flex;
+           flex-wrap: wrap; gap: 8px; align-items: center; pointer-events: none; }
+    #bar > * { pointer-events: auto; }
+    #status { padding: 6px 10px; border-radius: 6px; background: #8a3b2e; }
+    #status[data-ready="true"] { background: #2e6b45; }
+    button { padding: 6px 10px; border: 0; border-radius: 6px; background: #e8ecf2;
+             color: #1d2430; font: inherit; cursor: pointer; }
+    #help { position: absolute; bottom: 12px; left: 12px; opacity: .8; }
+  </style>
+</head>
+<body>
+  <div id="gz-scene"></div>
+  <div id="bar">
+    <span id="status">Loading…</span>
+    <button id="follow">Follow boat</button>
+    <button id="behind">Behind boat</button>
+    <button id="free">Free camera</button>
+  </div>
+  <div id="help">Drag to orbit · right-drag to pan · scroll to zoom</div>
+  <script type="module" src="viewer.js"></script>
+</body>
+</html>
